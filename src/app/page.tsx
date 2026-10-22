@@ -1,69 +1,336 @@
-import Image from "next/image";
+"use client"
+
+import { useEffect } from "react"
+import { useActionState } from "react"
+import { Lock, Sparkles } from "lucide-react"
+
+type ActionResult<T> =
+  | {
+      success: true
+      data: T
+    }
+  | {
+      success: false
+      error: string
+    }
+
+const NOISE_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`
+
+const submitForm = async (
+  _prevState: ActionResult<{ redirectUrl: string }> | null,
+  formData: FormData
+): Promise<ActionResult<{ redirectUrl: string }>> => {
+  try {
+    const email = formData.get("email")
+    const name = formData.get("name")
+    const consent = formData.get("consent")
+
+    // Validate required fields
+    if (!email || !name || !consent) {
+      return {
+        success: false,
+        error: "Please fill in all fields and accept the consent",
+      }
+    }
+
+    // Call the unlock API endpoint
+    const response = await fetch("/api/unlock", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        name,
+        consent: consent === "on",
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || "Failed to unlock portfolio",
+      }
+    }
+
+    return {
+      success: true,
+      data: { redirectUrl: data.data.redirectUrl },
+    }
+  } catch (error) {
+    console.error("Form submission error:", error)
+    return {
+      success: false,
+      error: "An error occurred. Please try again.",
+    }
+  }
+}
 
 export default function Home() {
+  const [state, formAction, isPending] = useActionState(submitForm, null)
+
+  useEffect(() => {
+    if (state?.success && state.data?.redirectUrl) {
+      setTimeout(() => {
+        window.location.href = state.data.redirectUrl
+      }, 500)
+    }
+  }, [state])
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main
+      className="relative min-h-screen overflow-hidden pt-10 pb-24 md:pt-16 md:pb-32"
+      style={{ backgroundColor: "var(--bg)" }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-40 right-0 h-160 w-160 translate-x-1/3 rounded-full blur-[90px]"
+        style={{ background: "radial-gradient(circle, var(--accent-glow) 0%, transparent 70%)" }}
+      />
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.03] mix-blend-overlay"
+        style={{ backgroundImage: NOISE_BG }}
+      />
+
+      <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-16">
+          {/* Left: Promotional Banner */}
+          <div className="flex flex-col justify-center space-y-10">
+            <div className="space-y-8">
+              <div
+                className="inline-flex w-fit items-center gap-3 rounded-full px-4 py-2"
+                style={{ backgroundColor: "rgba(0, 201, 255, 0.1)" }}
+              >
+                <Sparkles className="h-5 w-5" style={{ color: "var(--color-accent)" }} />
+                <span
+                  className="text-sm font-semibold tracking-widest uppercase"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  Curated Collection
+                </span>
+              </div>
+
+              <h1
+                className="font-display text-5xl leading-[1.2] font-black tracking-tight md:text-6xl"
+                style={{ color: "var(--ink)" }}
+              >
+                Our <span style={{ color: "var(--color-accent)" }}>Exclusive</span> Work
+              </h1>
+
+              <p
+                className="max-w-lg text-lg leading-relaxed font-light"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                Discover our latest portfolio of retouched photos, product films, and 3D renders
+                crafted for brands worldwide. This exclusive collection showcases projects that
+                define our studio&apos;s aesthetic and technical excellence.
+              </p>
+            </div>
+
+            <div
+              className="space-y-4 border-l-2 pl-6"
+              style={{ borderColor: "rgba(0, 201, 255, 0.3)" }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <h3
+                className="text-xs font-bold tracking-widest uppercase"
+                style={{ color: "var(--ink)" }}
+              >
+                What to expect:
+              </h3>
+              <ul className="space-y-3 text-sm" style={{ color: "var(--ink-soft)" }}>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+                    ◆
+                  </span>
+                  <span>High-resolution portfolio showcase</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+                    ◆
+                  </span>
+                  <span>Before and after comparisons</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+                    ◆
+                  </span>
+                  <span>Project details and case studies</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Right: Access Form */}
+          <div className="flex justify-center">
+            <div
+              className="relative w-full max-w-sm overflow-hidden rounded-lg p-8 sm:p-12"
+              style={{
+                backgroundColor: "var(--color-glass-bg)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                border: "1px solid var(--color-glass-border)",
+                boxShadow:
+                  "0 8px 32px 0 rgb(2 14 39 / 0.06), inset 0 1px 0 0 rgb(255 255 255 / 0.45)",
+              }}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-0 h-1"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%)",
+                }}
+              />
+
+              <div className="space-y-7">
+                <div className="flex items-center justify-center">
+                  <div
+                    className="flex h-14 w-14 items-center justify-center rounded-full"
+                    style={{ backgroundColor: "rgba(0, 201, 255, 0.15)" }}
+                  >
+                    <Lock className="h-7 w-7" style={{ color: "var(--color-accent)" }} />
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-center">
+                  <h2
+                    className="font-display text-3xl font-bold"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    Access Portfolio
+                  </h2>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                    Enter your details to view our curated work
+                  </p>
+                </div>
+
+                <form action={formAction} className="space-y-4">
+                  {state?.success && (
+                    <div className="rounded-sm border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
+                      ✓ Portfolio access granted! Redirecting...
+                    </div>
+                  )}
+
+                  {state && !state.success && (
+                    <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
+                      {state.error || "Something went wrong. Please try again."}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-semibold"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      Your Name
+                    </label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      required
+                      disabled={isPending}
+                      className="w-full rounded-sm border px-3 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      style={{
+                        backgroundColor: "var(--bg)",
+                        color: "var(--ink)",
+                        borderColor: "var(--border)",
+                      }}
+                      placeholder="Jane Doe"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      disabled={isPending}
+                      className="w-full rounded-sm border px-3 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      style={{
+                        backgroundColor: "var(--bg)",
+                        color: "var(--ink)",
+                        borderColor: "var(--border)",
+                      }}
+                      placeholder="jane@example.com"
+                    />
+                  </div>
+
+                  <label className="group flex cursor-pointer items-start gap-2">
+                    <input
+                      name="consent"
+                      type="checkbox"
+                      required
+                      disabled={isPending}
+                      className="mt-1 cursor-pointer"
+                      style={{ accentColor: "var(--color-accent)" }}
+                    />
+                    <span className="text-xs leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                      I consent to receive communications about this portfolio.
+                    </span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="w-full rounded-sm px-4 py-2.5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      backgroundColor: "var(--ink)",
+                      color: "var(--on-accent)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "rgba(2, 14, 39, 0.9)"
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "var(--ink)"
+                    }}
+                  >
+                    {isPending ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Unlocking...
+                      </span>
+                    ) : (
+                      "Unlock Portfolio"
+                    )}
+                  </button>
+                </form>
+
+                <div
+                  className="border-t pt-4 text-center"
+                  style={{ borderColor: "rgba(2, 14, 39, 0.12)" }}
+                >
+                  <p className="text-xs" style={{ color: "var(--ink-soft)" }}>
+                    Team member?{" "}
+                    <a
+                      href="https://vizualgraphics.com/portal/login"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold transition-colors"
+                      style={{ color: "var(--color-accent)" }}
+                    >
+                      Sign in
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  )
 }

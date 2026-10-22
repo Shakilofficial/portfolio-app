@@ -1,0 +1,93 @@
+/* ── Light theme (default) ── */
+:root {
+  --shadow-card: 0 10px 30px -4px rgb(2 14 39 / 0.06), 0 4px 12px -2px rgb(2 14 39 / 0.03);
+  --shadow-elevated: 0 24px 48px -8px rgb(2 14 39 / 0.12), 0 8px 24px -6px rgb(2 14 39 / 0.08);
+  --shadow-glass: 0 8px 32px 0 rgb(2 14 39 / 0.06), inset 0 1px 0 0 rgb(255 255 255 / 0.45);
+
+  --bg: #f4f7fb;
+  --bg-2: #ffffff;
+  --bg-3: #e8eef6;
+  --ink: #020e27;
+  --ink-soft: rgb(2 14 39 / 0.6);
+  --ink-panel: #020e27;
+  --border: rgb(2 14 39 / 0.12);
+  --accent-hover: #00a7d8;
+  --accent-glow: rgb(0 201 255 / 0.22);
+  --deep: #020e27;
+  --deep-2: #0a1d45;
+  --glow-deep: rgb(0 201 255 / 0.32);
+  --accent-text: #017ea9;
+  --nav-bg: rgb(244 247 251 / 0.55);
+  --nav-bg-scrolled: rgb(244 247 251 / 0.85);
+  --stripe: #eef3f9;
+  --stripe-2: rgb(2 14 39 / 0.05);
+  --toggle-track: rgb(2 14 39 / 0.1);
+  --glass-bg: #ffffff;
+  --glass-border: rgb(2 14 39 / 0.1);
+  --pill-hover: rgb(2 14 39 / 0.05);
+  --blob: rgb(0 201 255 / 0.12);
+  --paper-text: #f4f7fb;
+  --paper-soft: rgb(244 247 251 / 0.55);
+  --panel-bg: #eaf0f7;
+  --panel-text: #020e27;
+  --panel-text-soft: rgb(2 14 39 / 0.6);
+  --panel-border-soft: rgb(2 14 39 / 0.12);
+  --panel-input-bg: rgb(2 14 39 / 0.04);
+  --panel-input-border: rgb(2 14 39 / 0.16);
+  --panel-corner: rgb(2 14 39 / 0.3);
+
+  /* Tailwind theme colors */
+  --color-accent: #00c9ff;
+  --color-accent-2: #92fe9d;
+  --color-accent-glow: rgb(0 201 255 / 0.22);
+  --color-on-accent: #020e27;
+
+  color-scheme: light;
+}
+
+/* ── Dark theme ── */
+.dark {
+  --shadow-card: 0 12px 40px -10px rgb(0 0 0 / 0.7), 0 4px 16px -6px rgb(0 0 0 / 0.5);
+  --shadow-elevated: 0 32px 64px -12px rgb(0 0 0 / 0.85), 0 12px 28px -8px rgb(0 0 0 / 0.65);
+  --shadow-glass: 0 8px 32px 0 rgb(0 0 0 / 0.55), inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+
+  --bg: #01040d;
+  --bg-2: #040813;
+  --bg-3: #09101f;
+  --ink: #f4f7fb;
+  --ink-soft: rgb(244 247 251 / 0.62);
+  --ink-panel: #000103;
+  --border: rgb(244 247 251 / 0.14);
+  --accent-hover: #2ed3ff;
+  --accent-glow: rgb(0 201 255 / 0.28);
+  --deep: #050c1d;
+  --deep-2: #0b1832;
+  --glow-deep: rgb(0 201 255 / 0.26);
+  --accent-text: #00c9ff;
+  --nav-bg: rgb(1 4 13 / 0.5);
+  --nav-bg-scrolled: rgb(1 4 13 / 0.88);
+  --stripe: #09101f;
+  --stripe-2: rgb(244 247 251 / 0.06);
+  --toggle-track: rgb(244 247 251 / 0.15);
+  --glass-bg: #040813;
+  --glass-border: rgb(244 247 251 / 0.14);
+  --pill-hover: rgb(244 247 251 / 0.08);
+  --blob: rgb(0 201 255 / 0.12);
+  --paper-text: #f4f7fb;
+  --paper-soft: rgb(244 247 251 / 0.5);
+  --panel-bg: #000103;
+  --panel-text: #f4f7fb;
+  --panel-text-soft: rgb(244 247 251 / 0.55);
+  --panel-border-soft: rgb(244 247 251 / 0.1);
+  --panel-input-bg: rgb(244 247 251 / 0.06);
+  --panel-input-border: rgb(244 247 251 / 0.18);
+  --panel-corner: rgb(244 247 251 / 0.25);
+
+  /* Tailwind theme colors */
+  --color-accent: #00c9ff;
+  --color-accent-2: #92fe9d;
+  --color-accent-glow: rgb(0 201 255 / 0.28);
+  --color-on-accent: #f4f7fb;
+
+  color-scheme: dark;
+}

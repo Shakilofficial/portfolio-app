@@ -1,26 +1,709 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-accent: #00c9ff;
+  --color-accent-2: #92fe9d;
+  --color-archive-from: #4481eb;
+  --color-archive-to: #05befe;
+  --color-on-accent: #020e27;
+  --color-accent-text: var(--accent-text);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-panel: var(--ink-panel);
+  --color-border: var(--border);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-glow: var(--accent-glow);
+  --color-deep: var(--deep);
+  --color-deep-2: var(--deep-2);
+  --color-glow-deep: var(--glow-deep);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-bg-scrolled: var(--nav-bg-scrolled);
+  --color-stripe: var(--stripe);
+  --color-stripe-2: var(--stripe-2);
+  --color-toggle-track: var(--toggle-track);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-pill-hover: var(--pill-hover);
+  --color-blob: var(--blob);
+  --color-paper-text: var(--paper-text);
+  --color-paper-soft: var(--paper-soft);
+  --color-panel-bg: var(--panel-bg);
+  --color-panel-text: var(--panel-text);
+  --color-panel-text-soft: var(--panel-text-soft);
+  --color-panel-border-soft: var(--panel-border-soft);
+  --color-panel-input-bg: var(--panel-input-bg);
+  --color-panel-input-border: var(--panel-input-border);
+  --color-panel-corner: var(--panel-corner);
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --font-display: var(--font-bricolage), sans-serif; /* hero + section headlines */
+  --font-heading:
+    var(--font-bricolage), sans-serif; /* nav, buttons, labels, card titles, stats — always bold/semibold, matches the 600/700/800 weights loaded */
+  --font-serif:
+    var(--font-instrument-serif), Georgia, serif; /* italic accent word inside display headlines */
+  --font-body: var(--font-stack-sans-text), sans-serif; /* paragraph copy, form inputs */
+  --font-mono:
+    ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; /* eyebrow numerals, captions */
+
+  /* ── Border radius ──────────────────────────────────────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────────────── */
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-glow: 0 20px 40px 0 var(--color-accent-glow);
+  --shadow-glass: var(--shadow-glass);
+  --gradient-accent: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@utility site-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1536px;
+  padding-inline: 1rem;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
   }
 }
 
+/* Reusable frosted-glass surface — mega menus, dropdowns, mobile nav, modals.
+   One definition so every glass panel in the app looks the same. */
+@utility glass {
+  background-color: var(--color-glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+/* Same glass surface, plus --shadow-elevated layered on top of --shadow-glass
+   for genuinely floating panels (dialogs) — stacking a plain shadow-2xl on
+   top of `.glass` doesn't work, since both set `box-shadow` and one silently
+   clobbers the other depending on generated CSS order. `var()` references
+   compose cleanly inside a single box-shadow list, so this stays one
+   declaration instead of two competing ones. */
+@utility glass-elevated {
+  background-color: var(--color-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--shadow-glass), var(--shadow-elevated);
+}
+
+/* Cursor-reactive spotlight for bordered panels — src/hooks/usePointerGlow.ts
+   writes --pointer-x/-y/-opacity onto the element this class is applied to;
+   this utility just paints them. The container needs `overflow-hidden` (so
+   the 480px gradient doesn't bleed past rounded corners) and any real inner
+   content needs its own `position: relative` — an unpositioned child paints
+   *before* a positioned z-index:auto pseudo-element per normal CSS painting
+   order, so without that the glow would sit on top of the content instead
+   of behind it (the same relative-content convention ServiceCard's own
+   corner-glow-bloom already uses). */
+@utility pointer-glow {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--pointer-opacity, 0);
+    background: radial-gradient(
+      480px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+      var(--color-accent-glow),
+      transparent 70%
+    );
+    transition: opacity 400ms ease;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      display: none;
+    }
+  }
+}
+
+/* ── Light theme (default) ── */
+:root {
+  --shadow-card: 0 10px 30px -4px rgb(2 14 39 / 0.06), 0 4px 12px -2px rgb(2 14 39 / 0.03);
+  --shadow-elevated: 0 24px 48px -8px rgb(2 14 39 / 0.12), 0 8px 24px -6px rgb(2 14 39 / 0.08);
+  --shadow-glass: 0 8px 32px 0 rgb(2 14 39 / 0.06), inset 0 1px 0 0 rgb(255 255 255 / 0.45);
+
+  --bg: #f4f7fb;
+  --bg-2: #ffffff;
+  --bg-3: #e8eef6;
+  --ink: #020e27;
+  --ink-soft: rgb(2 14 39 / 0.6);
+  --ink-panel: #020e27;
+  --border: rgb(2 14 39 / 0.12);
+  --accent-hover: #00a7d8; /* cyan deepened ~18% toward navy — stays vivid but reads as "pressed" against white */
+  --accent-glow: rgb(
+    0 201 255 / 0.22
+  ); /* brand cyan (--color-accent) at low alpha — a soft blue halo on the pale page, no green cast */
+  /* Deep "stage" surface for full-bleed dark sections (story timeline,
+     hiring band, quick connect, office cards, chat header) and the glow
+     tuned to sit on it. Navy on the light theme; on the dark theme it
+     tracks the darker page palette so those sections don't float as a
+     lighter blue slab. */
+  --deep: #020e27;
+  --deep-2: #0a1d45;
+  --glow-deep: rgb(0 201 255 / 0.32);
+  --accent-text: #017ea9; /* deepened cyan, 4.6:1 on light bg — AA-safe as text/border */
+  --nav-bg: rgb(244 247 251 / 0.55); /* translucent at rest — the page shows through */
+  --nav-bg-scrolled: rgb(244 247 251 / 0.85); /* solidifies once the page scrolls under it */
+  --stripe: #eef3f9;
+  --stripe-2: rgb(2 14 39 / 0.05);
+  --toggle-track: rgb(2 14 39 / 0.1);
+  /* Fully opaque — dropdowns/menus/mega-menu panels need to read as solid
+     surfaces, not a transparency effect. Backdrop-blur stays applied
+     (harmless, and still softens the 1px seam at the panel's own edge) but
+     the fill itself no longer lets anything show through at all. */
+  --glass-bg: #ffffff;
+  --glass-border: rgb(
+    2 14 39 / 0.1
+  ); /* light theme: a hairline for definition; the shine comes from --shadow-glass's inset highlight instead */
+  --pill-hover: rgb(2 14 39 / 0.05);
+  --blob: rgb(0 201 255 / 0.12);
+  --paper-text: #f4f7fb;
+  --paper-soft: rgb(244 247 251 / 0.55);
+  --panel-bg: #eaf0f7;
+  --panel-text: #020e27;
+  --panel-text-soft: rgb(2 14 39 / 0.6);
+  --panel-border-soft: rgb(2 14 39 / 0.12);
+  --panel-input-bg: rgb(2 14 39 / 0.04);
+  --panel-input-border: rgb(2 14 39 / 0.16);
+  --panel-corner: rgb(2 14 39 / 0.3);
+
+  color-scheme: light;
+}
+
+/* ── Dark theme ── */
+.dark {
+  --shadow-card: 0 12px 40px -10px rgb(0 0 0 / 0.7), 0 4px 16px -6px rgb(0 0 0 / 0.5);
+  --shadow-elevated: 0 32px 64px -12px rgb(0 0 0 / 0.85), 0 12px 28px -8px rgb(0 0 0 / 0.65);
+  --shadow-glass: 0 8px 32px 0 rgb(0 0 0 / 0.55), inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+
+  --bg: #01040d;
+  --bg-2: #040813;
+  --bg-3: #09101f;
+  --ink: #f4f7fb;
+  --ink-soft: rgb(244 247 251 / 0.62);
+  --ink-panel: #000103; /* deeper than --bg itself — the "sunken" panel surface (dashboard cards, footer) */
+  --border: rgb(244 247 251 / 0.14);
+  --accent-hover: #2ed3ff; /* cyan lightened ~18% toward white — brightens on hover against the dark surface */
+  --accent-glow: rgb(0 201 255 / 0.28); /* brand cyan — reads as light, not haze, on near-black */
+  --deep: #050c1d;
+  --deep-2: #0b1832;
+  --glow-deep: rgb(0 201 255 / 0.26);
+  --accent-text: #00c9ff; /* raw accent hits ~10.5:1 on this bg — no need to darken it here */
+  --nav-bg: rgb(1 4 13 / 0.5); /* translucent at rest — the page shows through */
+  --nav-bg-scrolled: rgb(1 4 13 / 0.88); /* solidifies once the page scrolls under it */
+  --stripe: #09101f;
+  --stripe-2: rgb(244 247 251 / 0.06);
+  --toggle-track: rgb(244 247 251 / 0.15);
+  --glass-bg: #040813; /* fully opaque — see the light-theme note above */
+  --glass-border: rgb(244 247 251 / 0.14); /* bright hairline — the classic dark-mode glass edge */
+  --pill-hover: rgb(244 247 251 / 0.08);
+  --blob: rgb(0 201 255 / 0.12);
+  --paper-text: #f4f7fb;
+  --paper-soft: rgb(244 247 251 / 0.5);
+  --panel-bg: #000103;
+  --panel-text: #f4f7fb;
+  --panel-text-soft: rgb(244 247 251 / 0.55);
+  --panel-border-soft: rgb(244 247 251 / 0.1);
+  --panel-input-bg: rgb(244 247 251 / 0.06);
+  --panel-input-border: rgb(244 247 251 / 0.18);
+  --panel-corner: rgb(244 247 251 / 0.25);
+
+  color-scheme: dark;
+}
+
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px; /* fluid scaling base for small screens */
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 16px; /* standard base for tablet/desktop */
+  }
+}
+
+/* Safety net: decorative glows/blobs that bleed past a section edge must
+   never widen the page or produce a horizontal scrollbar. Set on <html>
+   (body-level overflow-x: clip is not propagated to the viewport). `clip`
+   creates no scroll container, so position: sticky keeps working. */
+html {
+  overflow-x: clip;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: var(--color-bg);
+
+  transition:
+    background-color 400ms ease,
+    color 400ms ease;
+}
+
+/* Firefox has no gradient/box-shadow support for scrollbars — `scrollbar-color`
+   only takes two flat colors, so it gets the brand accent solid instead of
+   the full gradient/glow treatment below (Chromium/Safari/Edge). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--color-bg-3);
+}
+*::-webkit-scrollbar-thumb {
+  background-image: var(--gradient-accent);
+  border-radius: 9999px;
+  border: 2px solid var(--color-bg-3);
+  background-clip: padding-box;
+  transition: box-shadow 200ms ease;
+}
+*::-webkit-scrollbar-thumb:hover {
+  box-shadow: 0 0 8px 1px var(--color-accent-glow);
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── Focus styles ────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+  outline-offset: 2px;
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px)) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 16px)) scale(0.96);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-marquee {
+  animation-name: marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes frame-scan {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+/* A soft light bar sweeping across a bordered "film frame" panel — the
+   flatbed-scanner/render-pass gesture, used where a frame should read as
+   actively processing rather than static (About's founding-year frame). */
+@utility animate-frame-scan {
+  animation: frame-scan 3.5s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}
+
+@keyframes text-shimmer {
+  0%,
+  100% {
+    color: var(--color-accent);
+  }
+  50% {
+    color: var(--color-accent-2);
+  }
+}
+
+/* Continuous but legible headline-accent animation: a solid-color pulse
+   between the two brand hues, not a gradient sweep. `color` is inherited,
+   so this stays correct even nested inside GSAP SplitText's per-character
+   markup (each split char has no color of its own, so it inherits the
+   live-animated value every frame) — a background-clip:text gradient would
+   NOT survive that split, since each character span would need its own
+   background-image to clip against and would otherwise just render
+   invisible. Glyphs themselves never move, so it never fights reading. */
+@utility text-shimmer {
+  animation: text-shimmer 3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation-play-state: paused;
+  }
+}
+
+/* ── Theme toggle — aperture/iris view transition ─────────────────────────
+   Circle-reveals the new theme from the toggle button's click position
+   (src/hooks/useTheme.ts sets --theme-toggle-x/-y before calling
+   document.startViewTransition). Browsers without View Transitions support
+   simply skip this — the hook applies the class change directly instead. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+/* Old theme settles back slightly while the new one opens over it. */
+::view-transition-old(root) {
+  z-index: 1;
+  animation: theme-settle 0.55s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+/* New theme opens as a circle from the toggle button. */
+::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-circle-reveal 0.55s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes theme-circle-reveal {
+  from {
+    clip-path: circle(0% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--theme-toggle-x, 50%) var(--theme-toggle-y, 50%));
+  }
+}
+@keyframes theme-settle {
+  to {
+    transform: scale(0.985);
+    opacity: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation: none !important;
+  }
+}
+
+/* Shockwave ring spawned at the exact click point (src/hooks/useTheme.ts) —
+   gives the click physical, rippling impact instead of the circle-reveal
+   being the only motion. Purely decorative and removed on animationend. */
+.theme-toggle-ripple {
+  position: fixed;
+  z-index: 9999;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-accent);
+  pointer-events: none;
+  animation: theme-toggle-ripple 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes theme-toggle-ripple {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(14);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle-ripple {
+    display: none;
+  }
+}
+
+/* Custom spring pop-in and heartbeat breathing animation for toaster icons */
+@keyframes icon-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes icon-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+.animate-icon-premium {
+  animation:
+    icon-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    icon-breath 2.5s ease-in-out 350ms infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-icon-premium {
+    animation: none !important;
+  }
+}
+
+/* Premium breathing shadow glow animations for toaster backgrounds */
+@keyframes toast-glow-success {
+  0%,
+  100% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 10px rgba(16, 185, 129, 0.15);
+  }
+  50% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 20px rgba(16, 185, 129, 0.32);
+  }
+}
+@keyframes toast-glow-error {
+  0%,
+  100% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 10px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 20px rgba(239, 68, 68, 0.32);
+  }
+}
+@keyframes toast-glow-normal {
+  0%,
+  100% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 10px rgba(0, 201, 255, 0.1);
+  }
+  50% {
+    box-shadow:
+      var(--shadow-glass),
+      0 0 18px rgba(0, 201, 255, 0.24);
+  }
+}
+.animate-toast-success {
+  animation: toast-glow-success 3s ease-in-out infinite;
+}
+.animate-toast-error {
+  animation: toast-glow-error 3s ease-in-out infinite;
+}
+.animate-toast-normal {
+  animation: toast-glow-normal 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-success,
+  .animate-toast-error,
+  .animate-toast-normal {
+    animation: none !important;
+  }
+}
+
+/* Animated SVG draw keyframes and classes for Toaster icons */
+@keyframes svg-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.animate-svg-draw {
+  animation: svg-draw 0.35s ease-out 0.15s forwards;
+}
+.animate-svg-draw-triangle {
+  animation: svg-draw 0.45s ease-out forwards;
+}
+.animate-svg-draw-fast {
+  animation: svg-draw 0.22s ease-out forwards;
+}
+.animate-svg-draw-fast-delayed {
+  animation: svg-draw 0.22s ease-out 0.1s forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-svg-draw,
+  .animate-svg-draw-triangle,
+  .animate-svg-draw-fast,
+  .animate-svg-draw-fast-delayed {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+}
+
+/* Premium Toaster Top Accent Lines via ::before */
+.toast-premium {
+  border-top: 0 !important;
+}
+.toast-premium::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 10;
+}
+.toast-premium-success::before {
+  background-image: linear-gradient(to right, #10b981, #059669);
+}
+.toast-premium-error::before {
+  background-image: linear-gradient(to right, #ef4444, #dc2626);
+}
+.toast-premium-normal::before {
+  background-image: var(--gradient-accent);
+}
+
+/* "Marching ants" selection outline (state pages' editor canvas) — an SVG
+   rect with a dashed stroke whose offset scrolls. */
+@keyframes march {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@utility animate-march {
+  animation: march 0.9s linear infinite;
+}
+
+/* Indeterminate progress sweep (loading screen's render bar). */
+@keyframes scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+@utility animate-scan {
+  animation: scan 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Radix (Select, Dialog, DropdownMenu) locks page scroll by putting
+   `overflow: hidden` on <body>. Because <html> uses `overflow-x: clip`, that
+   no longer propagates to the viewport — <body> itself becomes a scroll
+   container, which re-parents every `position: sticky` element to a box that
+   never scrolls, so sticky sidebars (e.g. /get-a-quote's "What happens next")
+   jump the moment a dropdown opens. `clip` hides overflow WITHOUT creating a
+   scroll container; the lock itself still holds (react-remove-scroll also
+   blocks wheel/touch input). The extra `html` raises specificity above the
+   library's own injected `body[data-scroll-locked]` !important rule. */
+html body[data-scroll-locked] {
+  overflow: clip !important;
+}
+
+/* Surface radius tokens. Shared ui/ primitives (Input, Select, DropdownMenu,
+   Tooltip, Button) read these with a 2px fallback — the dashboard's sharp
+   look stays exactly as it was. The public site's layout renders a hidden
+   [data-surface="public"] marker; while it's in the document, :root picks up
+   the rounded values below. Set on :root (not a wrapper) so Radix portals
+   (dropdown lists, tooltips) rendered straight into <body> get them too. */
+:root:has([data-surface="public"]) {
+  --radius-field: 0.75rem;
+  --radius-menu: 1rem;
+  --radius-item: 0.625rem;
+  --radius-button: 9999px;
+  --field-bg: var(--color-bg);
 }
