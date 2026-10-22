@@ -81,7 +81,7 @@ export default function Home() {
 
   return (
     <main
-      className="relative min-h-screen overflow-hidden pt-10 pb-24 md:pt-16 md:pb-32"
+      className="relative min-h-screen overflow-hidden flex items-center justify-center py-4 sm:py-6 md:py-8"
       style={{ backgroundColor: "var(--bg)" }}
     >
       <div
@@ -96,11 +96,11 @@ export default function Home() {
         style={{ backgroundImage: NOISE_BG }}
       />
 
-      <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-16">
-          {/* Left: Promotional Banner */}
-          <div className="flex flex-col justify-center space-y-10">
-            <div className="space-y-8">
+      <div className="relative mx-auto w-full max-w-6xl px-3 sm:px-6 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
+          {/* Left: Promotional Banner - Hidden on mobile */}
+          <div className="hidden lg:flex flex-col justify-center space-y-8">
+            <div className="space-y-6">
               <div
                 className="inline-flex w-fit items-center gap-3 rounded-full px-4 py-2"
                 style={{ backgroundColor: "rgba(0, 201, 255, 0.1)" }}
@@ -115,14 +115,14 @@ export default function Home() {
               </div>
 
               <h1
-                className="font-display text-5xl leading-[1.2] font-black tracking-tight md:text-6xl"
+                className="font-display text-4xl leading-[1.2] font-black tracking-tight lg:text-5xl"
                 style={{ color: "var(--ink)" }}
               >
                 Our <span style={{ color: "var(--color-accent)" }}>Exclusive</span> Work
               </h1>
 
               <p
-                className="max-w-lg text-lg leading-relaxed font-light"
+                className="max-w-lg text-base leading-relaxed font-light lg:text-lg"
                 style={{ color: "var(--ink-soft)" }}
               >
                 Discover our latest portfolio of retouched photos, product films, and 3D renders
@@ -132,7 +132,7 @@ export default function Home() {
             </div>
 
             <div
-              className="space-y-4 border-l-2 pl-6"
+              className="space-y-3 border-l-2 pl-4"
               style={{ borderColor: "rgba(0, 201, 255, 0.3)" }}
             >
               <h3
@@ -141,21 +141,21 @@ export default function Home() {
               >
                 What to expect:
               </h3>
-              <ul className="space-y-3 text-sm" style={{ color: "var(--ink-soft)" }}>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+              <ul className="space-y-2 text-sm" style={{ color: "var(--ink-soft)" }}>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 shrink-0 text-xs" style={{ color: "var(--color-accent)" }}>
                     ◆
                   </span>
                   <span>High-resolution portfolio showcase</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 shrink-0 text-xs" style={{ color: "var(--color-accent)" }}>
                     ◆
                   </span>
                   <span>Before and after comparisons</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1.5 shrink-0" style={{ color: "var(--color-accent)" }}>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 shrink-0 text-xs" style={{ color: "var(--color-accent)" }}>
                     ◆
                   </span>
                   <span>Project details and case studies</span>
@@ -165,9 +165,9 @@ export default function Home() {
           </div>
 
           {/* Right: Access Form */}
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full lg:w-auto">
             <div
-              className="relative w-full max-w-sm overflow-hidden rounded-lg p-8 sm:p-12"
+              className="relative w-full max-w-sm overflow-hidden rounded-lg p-5 sm:p-8 lg:p-10"
               style={{
                 backgroundColor: "var(--color-glass-bg)",
                 backdropFilter: "blur(20px) saturate(180%)",
@@ -186,45 +186,45 @@ export default function Home() {
                 }}
               />
 
-              <div className="space-y-7">
+              <div className="space-y-5 sm:space-y-6">
                 <div className="flex items-center justify-center">
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-full"
+                    className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full"
                     style={{ backgroundColor: "rgba(0, 201, 255, 0.15)" }}
                   >
-                    <Lock className="h-7 w-7" style={{ color: "var(--color-accent)" }} />
+                    <Lock className="h-6 w-6 sm:h-7 sm:w-7" style={{ color: "var(--color-accent)" }} />
                   </div>
                 </div>
 
-                <div className="space-y-3 text-center">
+                <div className="space-y-2 text-center">
                   <h2
-                    className="font-display text-3xl font-bold"
+                    className="font-display text-2xl sm:text-3xl font-bold"
                     style={{ color: "var(--ink)" }}
                   >
                     Access Portfolio
                   </h2>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                  <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
                     Enter your details to view our curated work
                   </p>
                 </div>
 
-                <form action={formAction} className="space-y-4">
+                <form action={formAction} className="space-y-3">
                   {state?.success && (
-                    <div className="rounded-sm border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
+                    <div className="rounded-sm border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs sm:text-sm text-green-600 dark:text-green-400">
                       ✓ Portfolio access granted! Redirecting...
                     </div>
                   )}
 
                   {state && !state.success && (
-                    <div className="rounded-sm border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
+                    <div className="rounded-sm border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400">
                       {state.error || "Something went wrong. Please try again."}
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label
                       htmlFor="name"
-                      className="block text-sm font-semibold"
+                      className="block text-xs sm:text-sm font-semibold"
                       style={{ color: "var(--ink)" }}
                     >
                       Your Name
@@ -235,7 +235,7 @@ export default function Home() {
                       type="text"
                       required
                       disabled={isPending}
-                      className="w-full rounded-sm border px-3 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      className="w-full rounded-sm border px-3 py-2 text-xs sm:text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
                       style={{
                         backgroundColor: "var(--bg)",
                         color: "var(--ink)",
@@ -245,10 +245,10 @@ export default function Home() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label
                       htmlFor="email"
-                      className="block text-sm font-semibold"
+                      className="block text-xs sm:text-sm font-semibold"
                       style={{ color: "var(--ink)" }}
                     >
                       Email Address
@@ -259,7 +259,7 @@ export default function Home() {
                       type="email"
                       required
                       disabled={isPending}
-                      className="w-full rounded-sm border px-3 py-2.5 text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      className="w-full rounded-sm border px-3 py-2 text-xs sm:text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
                       style={{
                         backgroundColor: "var(--bg)",
                         color: "var(--ink)",
@@ -275,10 +275,10 @@ export default function Home() {
                       type="checkbox"
                       required
                       disabled={isPending}
-                      className="mt-1 cursor-pointer"
+                      className="mt-0.5 cursor-pointer h-4 w-4"
                       style={{ accentColor: "var(--color-accent)" }}
                     />
-                    <span className="text-xs leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                    <span className="text-xs leading-snug" style={{ color: "var(--ink-soft)" }}>
                       I consent to receive communications about this portfolio.
                     </span>
                   </label>
@@ -286,13 +286,12 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="w-full rounded-sm px-4 py-2.5 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    className="w-full rounded-sm px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-90 active:scale-95"
                     style={{
                       backgroundColor: "var(--ink)",
-                      color: "var(--on-accent)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "rgba(2, 14, 39, 0.9)"
+                      e.currentTarget.style.backgroundColor = "rgba(2, 14, 39, 0.85)"
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "var(--ink)"
@@ -300,8 +299,8 @@ export default function Home() {
                   >
                     {isPending ? (
                       <span className="flex items-center justify-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        Unlocking...
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span>Unlocking...</span>
                       </span>
                     ) : (
                       "Unlock Portfolio"
@@ -310,16 +309,16 @@ export default function Home() {
                 </form>
 
                 <div
-                  className="border-t pt-4 text-center"
+                  className="border-t pt-3 text-center"
                   style={{ borderColor: "rgba(2, 14, 39, 0.12)" }}
                 >
-                  <p className="text-xs" style={{ color: "var(--ink-soft)" }}>
+                  <p className="text-xs leading-snug" style={{ color: "var(--ink-soft)" }}>
                     Team member?{" "}
                     <a
                       href="https://vizualgraphics.com/portal/login"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold transition-colors"
+                      className="font-semibold transition-colors hover:opacity-80"
                       style={{ color: "var(--color-accent)" }}
                     >
                       Sign in
