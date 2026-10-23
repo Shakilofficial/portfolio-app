@@ -2,6 +2,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
+export const instant = false
+
 interface PortfolioAsset {
   id: string
   kind: string
