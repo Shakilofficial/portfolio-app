@@ -1,4 +1,300 @@
-export default function PortfolioPage() {
+import Image from "next/image"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+
+export const dynamic = "force-dynamic"
+
+interface PortfolioAsset {
+  id: string
+  kind: string
+  storageKey: string
+  width: number | null
+  height: number | null
+  durationSec: number | null
+  caption: string | null
+  sortOrder: number
+}
+
+interface PortfolioItem {
+  id: string
+  slug: string
+  title: string
+  description?: string | null
+  clientName?: string | null
+  sortOrder: number
+  isFeatured: boolean
+  assets: PortfolioAsset[]
+  service: {
+    id: string
+    name: string
+  }
+}
+
+async function getPortfolioItems(): Promise<PortfolioItem[]> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/portfolio/items`,
+      {
+        next: { revalidate: 3600 }, // Revalidate every hour
+      }
+    )
+
+    if (!response.ok) {
+      console.error(
+        "Failed to fetch portfolio items:",
+        response.status
+      )
+      return []
+    }
+
+    const data = await response.json()
+    return data.data || []
+  } catch (error) {
+    console.error("Error fetching portfolio items:", error)
+    return []
+  }
+}
+
+function buildAssetUrl(storageKey: string): string {
+  // Images are uploaded to the API server at /var/www/vizualgraphics/public/uploads/
+  // storageKey is like: "uploads/1792601833118-45efac01.png"
+  // Access via API server domain
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.vizualgraphics.com"
+  if (!apiUrl) {
+    console.error("NEXT_PUBLIC_API_URL not set, using fallback")
+  }
+  return `${apiUrl}/${storageKey}`
+}
+
+export default async function PortfolioPage(props: {
+  searchParams?: { item?: string }
+}) {
+  const items = await getPortfolioItems()
+  const selectedItemSlug = props.searchParams?.item
+
+  // If an item is selected, show detail view
+  if (selectedItemSlug) {
+    const selectedItem = items.find((p) => p.slug === selectedItemSlug)
+
+    if (!selectedItem) {
+      notFound()
+    }
+
+    return (
+        <main
+          className="min-h-screen py-20"
+          style={{ backgroundColor: "var(--bg)" }}
+        >
+          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            {/* Back Button */}
+            <div className="mb-12">
+              <Link
+                href="/portfolio"
+                className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
+                style={{ color: "var(--color-accent)" }}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Back to Gallery
+              </Link>
+            </div>
+
+            {/* Project Header */}
+            <div className="mb-12 space-y-6">
+              <div>
+                <p
+                  className="text-sm font-medium mb-2"
+                  style={{ color: "var(--color-accent)" }}
+                >
+                  {selectedItem.service?.name}
+                </p>
+                <h1
+                  className="font-display text-5xl font-black tracking-tight md:text-6xl mb-4"
+                  style={{ color: "var(--ink)" }}
+                >
+                  {selectedItem.title}
+                </h1>
+                {selectedItem.clientName && (
+                  <p
+                    className="text-xl"
+                    style={{ color: "var(--ink-soft)" }}
+                  >
+                    Client: <span style={{ color: "var(--ink)" }}>{selectedItem.clientName}</span>
+                  </p>
+                )}
+              </div>
+
+              {selectedItem.description && (
+                <p
+                  className="text-lg leading-relaxed max-w-2xl"
+                  style={{ color: "var(--ink-soft)" }}
+                >
+                  {selectedItem.description}
+                </p>
+              )}
+            </div>
+
+            {/* Assets Gallery */}
+            {selectedItem.assets && selectedItem.assets.length > 0 && (
+              <div className="space-y-8 mb-16">
+                {selectedItem.assets.map((asset) => (
+                  <div key={asset.id} className="space-y-3">
+                    {asset.kind === "image" && (
+                      <div
+                        className="relative w-full overflow-hidden rounded-lg"
+                        style={{
+                          backgroundColor: "var(--bg-2)",
+                          border: "1px solid var(--border)",
+                        }}
+                      >
+                        <Image
+                          src={buildAssetUrl(asset.storageKey)}
+                          alt={asset.caption || selectedItem.title}
+                          width={asset.width || 1200}
+                          height={asset.height || 800}
+                          className="w-full h-auto"
+                        />
+                      </div>
+                    )}
+
+                    {asset.kind === "video" && (
+                      <div
+                        className="relative w-full overflow-hidden rounded-lg bg-black"
+                        style={{
+                          backgroundColor: "var(--bg-2)",
+                          border: "1px solid var(--border)",
+                        }}
+                      >
+                        <video
+                          src={buildAssetUrl(asset.storageKey)}
+                          controls
+                          className="w-full h-auto"
+                        />
+                      </div>
+                    )}
+
+                    {asset.caption && (
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--ink-soft)" }}
+                      >
+                        {asset.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Project Info */}
+            <div
+              className="rounded-lg p-8 mb-16"
+              style={{
+                backgroundColor: "var(--bg-2)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <div className="grid md:grid-cols-3 gap-8">
+                {selectedItem.service && (
+                  <div>
+                    <p
+                      className="text-xs font-medium mb-2 uppercase"
+                      style={{ color: "var(--ink-soft)" }}
+                    >
+                      Service
+                    </p>
+                    <p
+                      className="text-lg font-semibold"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      {selectedItem.service.name}
+                    </p>
+                  </div>
+                )}
+
+                {selectedItem.clientName && (
+                  <div>
+                    <p
+                      className="text-xs font-medium mb-2 uppercase"
+                      style={{ color: "var(--ink-soft)" }}
+                    >
+                      Client
+                    </p>
+                    <p
+                      className="text-lg font-semibold"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      {selectedItem.clientName}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <p
+                    className="text-xs font-medium mb-2 uppercase"
+                    style={{ color: "var(--ink-soft)" }}
+                  >
+                    Assets
+                  </p>
+                  <p
+                    className="text-lg font-semibold"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    {selectedItem.assets?.length || 0} file{selectedItem.assets && selectedItem.assets.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Footer */}
+            <div
+              className="rounded-lg p-12 text-center"
+              style={{
+                backgroundColor: "var(--color-glass-bg)",
+                border: "1px solid var(--color-glass-border)",
+              }}
+            >
+              <h2
+                className="mb-4 text-3xl font-bold"
+                style={{ color: "var(--ink)" }}
+              >
+                Interested in working together?
+              </h2>
+              <p
+                className="mb-8 text-lg"
+                style={{ color: "var(--ink-soft)" }}
+              >
+                Let's create something extraordinary for your project.
+              </p>
+              <a
+                href="https://vizualgraphics.com/contact"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: "var(--color-accent)",
+                  color: "var(--ink)",
+                }}
+                className="inline-block rounded-sm px-8 py-3 font-semibold transition-opacity hover:opacity-90"
+              >
+                Get in Touch
+              </a>
+            </div>
+          </div>
+        </main>
+      )
+  }
+
   return (
     <main
       className="min-h-screen py-20"
@@ -24,53 +320,119 @@ export default function PortfolioPage() {
           </div>
 
           {/* Gallery Grid */}
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div
-                key={item}
-                className="group relative aspect-square overflow-hidden rounded-lg"
-                style={{
-                  backgroundColor: "var(--bg-2)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                {/* Placeholder */}
-                <div className="flex h-full w-full items-center justify-center">
-                  <div className="text-center">
-                    <div
-                      className="text-6xl font-bold opacity-20"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {item}
-                    </div>
-                    <p
-                      className="text-sm opacity-40"
-                      style={{ color: "var(--ink-soft)" }}
-                    >
-                      Portfolio Item {item}
-                    </p>
-                  </div>
-                </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {items.length > 0 ? (
+              items.map((item) => {
+                const primaryAsset = item.assets?.[0]
 
-                {/* Hover overlay */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    backgroundColor: "rgba(2, 14, 39, 0.7)",
-                  }}
-                >
-                  <button
-                    style={{
-                      backgroundColor: "var(--color-accent)",
-                      color: "var(--ink)",
-                    }}
-                    className="rounded-sm px-6 py-2.5 font-semibold transition-opacity hover:opacity-90"
+                return (
+                  <Link
+                    key={item.id}
+                    href={`/portfolio?item=${item.slug}`}
+                    className="group"
                   >
-                    View Project
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <div className="relative overflow-hidden rounded-2xl h-96 cursor-pointer">
+                      {/* Asset Display */}
+                      {primaryAsset && primaryAsset.kind === "image" && (
+                        <Image
+                          src={buildAssetUrl(primaryAsset.storageKey)}
+                          alt={primaryAsset.caption || item.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          priority
+                        />
+                      )}
+
+                      {primaryAsset && primaryAsset.kind === "video" && (
+                        <div className="relative w-full h-full bg-black">
+                          <video
+                            src={buildAssetUrl(primaryAsset.storageKey)}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            controls={false}
+                            muted
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-full bg-white/30 group-hover:bg-white/50 flex items-center justify-center transition-colors">
+                              <svg
+                                className="w-8 h-8 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {!primaryAsset && (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black">
+                          <div className="text-center">
+                            <div className="text-5xl font-black opacity-20 mb-2" style={{ color: "var(--ink)" }}>
+                              {item.title.charAt(0).toUpperCase()}
+                            </div>
+                            <p className="text-sm opacity-40" style={{ color: "var(--ink-soft)" }}>
+                              {item.title}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <div className="space-y-3">
+                          <div>
+                            {item.service && (
+                              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-accent)" }}>
+                                {item.service.name}
+                              </p>
+                            )}
+                            <h3 className="text-2xl font-bold mt-1" style={{ color: "var(--ink)" }}>
+                              {item.title}
+                            </h3>
+                          </div>
+
+                          {item.clientName && (
+                            <p className="text-sm" style={{ color: "var(--ink-soft)" }}>
+                              {item.clientName}
+                            </p>
+                          )}
+
+                          {item.description && (
+                            <p className="text-sm line-clamp-2" style={{ color: "var(--ink-soft)" }}>
+                              {item.description}
+                            </p>
+                          )}
+
+                          <div className="pt-2 flex items-center gap-2 group/btn">
+                            <span
+                              className="text-sm font-semibold transition-all duration-300"
+                              style={{ color: "var(--color-accent)" }}
+                            >
+                              View Details
+                            </span>
+                            <svg className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" style={{ color: "var(--color-accent)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Asset count badge */}
+                      {item.assets && item.assets.length > 1 && (
+                        <div
+                          className="absolute top-4 right-4 rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+                          style={{ backgroundColor: "rgba(0, 201, 255, 0.9)" }}
+                        >
+                          {item.assets.length} items
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })
+            ) : null}
           </div>
 
           {/* Footer CTA */}

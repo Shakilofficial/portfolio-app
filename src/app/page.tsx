@@ -48,7 +48,7 @@ const submitForm = async (
 
     const data = await response.json()
 
-    if (!response.ok) {
+    if (!response.ok || !data.success) {
       return {
         success: false,
         error: data.error || "Failed to unlock portfolio",
@@ -57,7 +57,7 @@ const submitForm = async (
 
     return {
       success: true,
-      data: { redirectUrl: data.data.redirectUrl },
+      data: { redirectUrl: data.data?.redirectUrl || "/portfolio" },
     }
   } catch (error) {
     console.error("Form submission error:", error)

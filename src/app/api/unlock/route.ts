@@ -56,6 +56,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       return Response.json(data, { status: backendResponse.status })
     }
 
+    // Ensure redirect goes to portfolio gallery, not home
+    if (data.success && data.data?.redirectUrl === "/") {
+      data.data.redirectUrl = "/portfolio"
+    }
+
     return Response.json(data)
   } catch (error) {
     console.error("Portfolio unlock error:", error)
