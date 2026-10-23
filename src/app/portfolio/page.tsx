@@ -380,8 +380,8 @@ export default async function PortfolioPage(props: {
                         </div>
                       )}
 
-                      {/* Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                      {/* Overlay - Always visible with gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex flex-col justify-end p-6">
                         <div className="space-y-3">
                           <div>
                             {item.service && (
@@ -406,9 +406,9 @@ export default async function PortfolioPage(props: {
                             </p>
                           )}
 
-                          <div className="pt-2 flex items-center gap-2 group/btn">
+                          <div className="pt-2 flex items-center gap-2 group/btn group-hover:translate-y-0 translate-y-2 transition-transform duration-300">
                             <span
-                              className="text-sm font-semibold transition-all duration-300"
+                              className="text-sm font-semibold"
                               style={{ color: "var(--color-accent)" }}
                             >
                               View Details
