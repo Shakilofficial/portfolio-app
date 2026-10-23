@@ -14,6 +14,7 @@ interface PortfolioAsset {
   id: string
   kind: string
   storageKey: string
+  url?: string
   width: number | null
   height: number | null
   durationSec: number | null
@@ -61,9 +62,31 @@ async function getPortfolioItems(): Promise<PortfolioItem[]> {
   }
 }
 
-function buildAssetUrl(storageKey: string): string {
+function buildAssetUrl(asset: PortfolioAsset | string): string {
+  // If asset has a url property (from API transformation), use it directly
+  if (typeof asset === 'object' && asset.url) {
+    const url = asset.url
+    if (!url.startsWith('http') && !url.startsWith('/')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
+      return `${apiUrl}/${url}`
+    }
+    if (url.startsWith('/')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
+      return `${apiUrl}${url}`
+    }
+    return url
+  }
+
+  const storageKey = typeof asset === 'string' ? asset : asset.storageKey
+  if (storageKey.startsWith('http')) {
+    return storageKey
+  }
+  if (storageKey.startsWith('/')) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
+    return `${apiUrl}${storageKey}`
+  }
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
-  return `${apiUrl}/${storageKey}`
+  return `${apiUrl}/uploads/${storageKey}`
 }
 
 export default async function PortfolioPage(props: {
@@ -208,7 +231,7 @@ export default async function PortfolioPage(props: {
                           }}
                         >
                           <Image
-                            src={buildAssetUrl(asset.storageKey)}
+                            src={buildAssetUrl(asset)}
                             alt={asset.caption || selectedItem.title}
                             width={asset.width || 1200}
                             height={asset.height || 800}
@@ -227,7 +250,7 @@ export default async function PortfolioPage(props: {
                           }}
                         >
                           <video
-                            src={buildAssetUrl(asset.storageKey)}
+                            src={buildAssetUrl(asset)}
                             controls
                             className="w-full h-auto"
                           />
@@ -328,7 +351,7 @@ export default async function PortfolioPage(props: {
                       {/* Asset Display */}
                       {primaryAsset && primaryAsset.kind === "image" && (
                         <Image
-                          src={buildAssetUrl(primaryAsset.storageKey)}
+                          src={buildAssetUrl(primaryAsset)}
                           alt={primaryAsset.caption || item.title}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -340,7 +363,7 @@ export default async function PortfolioPage(props: {
                       {primaryAsset && primaryAsset.kind === "video" && (
                         <div className="relative w-full h-full bg-black">
                           <video
-                            src={buildAssetUrl(primaryAsset.storageKey)}
+                            src={buildAssetUrl(primaryAsset)}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             controls={false}
                             muted
