@@ -65,10 +65,11 @@ function buildAssetUrl(storageKey: string): string {
 }
 
 export default async function PortfolioPage(props: {
-  searchParams?: { item?: string }
+  searchParams?: Promise<{ item?: string }>
 }) {
   const items = await getPortfolioItems()
-  const selectedItemSlug = props.searchParams?.item
+  const searchParams = await props.searchParams
+  const selectedItemSlug = searchParams?.item
 
   // If an item is selected, show detail view
   if (selectedItemSlug) {
