@@ -1,8 +1,15 @@
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
 
 export const instant = false
+
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description: "A gallery of image editing, video, and 3D/CGI projects — open any piece to see details and full production work.",
+  path: "/portfolio",
+}
 
 interface PortfolioAsset {
   id: string
@@ -83,15 +90,15 @@ export default async function PortfolioPage(props: {
 
     return (
         <main
-          className="min-h-screen py-20"
+          className="min-h-screen py-12 md:py-20"
           style={{ backgroundColor: "var(--bg)" }}
         >
-          <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             {/* Back Button */}
-            <div className="mb-12">
+            <div className="mb-8">
               <Link
                 href="/portfolio"
-                className="inline-flex items-center gap-2 transition-opacity hover:opacity-70"
+                className="inline-flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-70"
                 style={{ color: "var(--color-accent)" }}
               >
                 <svg
@@ -112,184 +119,176 @@ export default async function PortfolioPage(props: {
             </div>
 
             {/* Project Header */}
-            <div className="mb-12 space-y-6">
-              <div>
-                <p
-                  className="text-sm font-medium mb-2"
-                  style={{ color: "var(--color-accent)" }}
-                >
-                  {selectedItem.service?.name}
-                </p>
-                <h1
-                  className="font-display text-5xl font-black tracking-tight md:text-6xl mb-4"
-                  style={{ color: "var(--ink)" }}
-                >
-                  {selectedItem.title}
-                </h1>
-                {selectedItem.clientName && (
+            <div className="mb-12 grid gap-8 lg:grid-cols-3 lg:items-start">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-3">
                   <p
-                    className="text-xl"
+                    className="text-xs font-bold tracking-widest uppercase"
+                    style={{ color: "var(--color-accent)" }}
+                  >
+                    {selectedItem.service?.name}
+                  </p>
+                  <h1
+                    className="font-display text-4xl md:text-5xl font-black tracking-tight"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    {selectedItem.title}
+                  </h1>
+                </div>
+
+                {selectedItem.description && (
+                  <p
+                    className="text-base md:text-lg leading-relaxed max-w-2xl"
                     style={{ color: "var(--ink-soft)" }}
                   >
-                    Client: <span style={{ color: "var(--ink)" }}>{selectedItem.clientName}</span>
+                    {selectedItem.description}
                   </p>
-                )}
-              </div>
-
-              {selectedItem.description && (
-                <p
-                  className="text-lg leading-relaxed max-w-2xl"
-                  style={{ color: "var(--ink-soft)" }}
-                >
-                  {selectedItem.description}
-                </p>
-              )}
-            </div>
-
-            {/* Assets Gallery */}
-            {selectedItem.assets && selectedItem.assets.length > 0 && (
-              <div className="space-y-8 mb-16">
-                {selectedItem.assets.map((asset) => (
-                  <div key={asset.id} className="space-y-3">
-                    {asset.kind === "image" && (
-                      <div
-                        className="relative w-full overflow-hidden rounded-lg"
-                        style={{
-                          backgroundColor: "var(--bg-2)",
-                          border: "1px solid var(--border)",
-                        }}
-                      >
-                        <Image
-                          src={buildAssetUrl(asset.storageKey)}
-                          alt={asset.caption || selectedItem.title}
-                          width={asset.width || 1200}
-                          height={asset.height || 800}
-                          className="w-full h-auto"
-                        />
-                      </div>
-                    )}
-
-                    {asset.kind === "video" && (
-                      <div
-                        className="relative w-full overflow-hidden rounded-lg bg-black"
-                        style={{
-                          backgroundColor: "var(--bg-2)",
-                          border: "1px solid var(--border)",
-                        }}
-                      >
-                        <video
-                          src={buildAssetUrl(asset.storageKey)}
-                          controls
-                          className="w-full h-auto"
-                        />
-                      </div>
-                    )}
-
-                    {asset.caption && (
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--ink-soft)" }}
-                      >
-                        {asset.caption}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Project Info */}
-            <div
-              className="rounded-lg p-8 mb-16"
-              style={{
-                backgroundColor: "var(--bg-2)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <div className="grid md:grid-cols-3 gap-8">
-                {selectedItem.service && (
-                  <div>
-                    <p
-                      className="text-xs font-medium mb-2 uppercase"
-                      style={{ color: "var(--ink-soft)" }}
-                    >
-                      Service
-                    </p>
-                    <p
-                      className="text-lg font-semibold"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {selectedItem.service.name}
-                    </p>
-                  </div>
                 )}
 
                 {selectedItem.clientName && (
-                  <div>
-                    <p
-                      className="text-xs font-medium mb-2 uppercase"
-                      style={{ color: "var(--ink-soft)" }}
-                    >
+                  <div
+                    className="rounded-lg p-4 border"
+                    style={{
+                      backgroundColor: "var(--bg-2)",
+                      borderColor: "var(--border)",
+                    }}
+                  >
+                    <p className="text-xs font-semibold uppercase mb-1" style={{ color: "var(--ink-soft)" }}>
                       Client
                     </p>
-                    <p
-                      className="text-lg font-semibold"
-                      style={{ color: "var(--ink)" }}
-                    >
+                    <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>
                       {selectedItem.clientName}
                     </p>
                   </div>
                 )}
+              </div>
 
-                <div>
-                  <p
-                    className="text-xs font-medium mb-2 uppercase"
-                    style={{ color: "var(--ink-soft)" }}
-                  >
-                    Assets
-                  </p>
-                  <p
-                    className="text-lg font-semibold"
-                    style={{ color: "var(--ink)" }}
-                  >
-                    {selectedItem.assets?.length || 0} file{selectedItem.assets && selectedItem.assets.length !== 1 ? "s" : ""}
-                  </p>
+              {/* Quick Stats */}
+              <div
+                className="rounded-lg p-6 border"
+                style={{
+                  backgroundColor: "var(--color-glass-bg)",
+                  borderColor: "var(--color-glass-border)",
+                }}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase mb-2" style={{ color: "var(--ink-soft)" }}>
+                      Project Type
+                    </p>
+                    <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>
+                      {selectedItem.service?.name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase mb-2" style={{ color: "var(--ink-soft)" }}>
+                      Assets
+                    </p>
+                    <p className="text-lg font-semibold" style={{ color: "var(--ink)" }}>
+                      {selectedItem.assets?.length || 0} file{selectedItem.assets && selectedItem.assets.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* Assets Gallery */}
+            {selectedItem.assets && selectedItem.assets.length > 0 && (
+              <div className="mb-16">
+                <div className="mb-8">
+                  <h2
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    Project Showcase
+                  </h2>
+                </div>
+                <div className="space-y-8">
+                  {selectedItem.assets.map((asset) => (
+                    <div key={asset.id} className="space-y-3">
+                      {asset.kind === "image" && (
+                        <div
+                          className="relative w-full overflow-hidden rounded-2xl"
+                          style={{
+                            backgroundColor: "var(--bg-2)",
+                            border: "1px solid var(--border)",
+                          }}
+                        >
+                          <Image
+                            src={buildAssetUrl(asset.storageKey)}
+                            alt={asset.caption || selectedItem.title}
+                            width={asset.width || 1200}
+                            height={asset.height || 800}
+                            className="w-full h-auto"
+                            priority={selectedItem.assets && selectedItem.assets.indexOf(asset) === 0}
+                          />
+                        </div>
+                      )}
+
+                      {asset.kind === "video" && (
+                        <div
+                          className="relative w-full overflow-hidden rounded-2xl bg-black"
+                          style={{
+                            backgroundColor: "var(--bg-2)",
+                            border: "1px solid var(--border)",
+                          }}
+                        >
+                          <video
+                            src={buildAssetUrl(asset.storageKey)}
+                            controls
+                            className="w-full h-auto"
+                          />
+                        </div>
+                      )}
+
+                      {asset.caption && (
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: "var(--ink-soft)" }}
+                        >
+                          {asset.caption}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* CTA Footer */}
-            <div
-              className="rounded-lg p-12 text-center"
-              style={{
-                backgroundColor: "var(--color-glass-bg)",
-                border: "1px solid var(--color-glass-border)",
-              }}
-            >
-              <h2
-                className="mb-4 text-3xl font-bold"
-                style={{ color: "var(--ink)" }}
-              >
-                Interested in working together?
-              </h2>
-              <p
-                className="mb-8 text-lg"
-                style={{ color: "var(--ink-soft)" }}
-              >
-                Let's create something extraordinary for your project.
-              </p>
-              <a
-                href="https://vizualgraphics.com/contact"
-                target="_blank"
-                rel="noopener noreferrer"
+            <div className="mt-16 mb-0">
+              <div
+                className="rounded-2xl p-8 md:p-12 text-center"
                 style={{
-                  backgroundColor: "var(--color-accent)",
-                  color: "var(--ink)",
+                  backgroundColor: "var(--color-glass-bg)",
+                  border: "1px solid var(--color-glass-border)",
                 }}
-                className="inline-block rounded-sm px-8 py-3 font-semibold transition-opacity hover:opacity-90"
               >
-                Get in Touch
-              </a>
+                <h2
+                  className="mb-3 text-3xl md:text-4xl font-bold"
+                  style={{ color: "var(--ink)" }}
+                >
+                  Interested in working together?
+                </h2>
+                <p
+                  className="mb-8 text-base md:text-lg max-w-2xl mx-auto"
+                  style={{ color: "var(--ink-soft)" }}
+                >
+                  Let's create something extraordinary for your brand.
+                </p>
+                <a
+                  href="https://vizualgraphics.com/contact"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: "var(--color-accent)",
+                    color: "var(--ink)",
+                  }}
+                  className="inline-block rounded-sm px-8 py-3 font-semibold transition-opacity hover:opacity-90"
+                >
+                  Get in Touch
+                </a>
+              </div>
             </div>
           </div>
         </main>
