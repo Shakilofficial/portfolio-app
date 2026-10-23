@@ -56,9 +56,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       return Response.json(data, { status: backendResponse.status })
     }
 
-    // Ensure redirect goes to portfolio gallery, not home
-    if (data.success && data.data?.redirectUrl === "/") {
+    // Ensure redirect ALWAYS goes to portfolio gallery
+    if (data.success && data.data) {
       data.data.redirectUrl = "/portfolio"
+    } else if (!data.success) {
+      return Response.json(data, { status: 400 })
     }
 
     return Response.json(data)

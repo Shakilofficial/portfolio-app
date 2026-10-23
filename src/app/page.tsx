@@ -57,7 +57,7 @@ const submitForm = async (
 
     return {
       success: true,
-      data: { redirectUrl: data.data?.redirectUrl || "/portfolio" },
+      data: { redirectUrl: "/portfolio" },
     }
   } catch (error) {
     console.error("Form submission error:", error)
