@@ -8,7 +8,6 @@ export const instant = false
 export const metadata: Metadata = {
   title: "Portfolio",
   description: "A gallery of image editing, video, and 3D/CGI projects — open any piece to see details and full production work.",
-  path: "/portfolio",
 }
 
 interface PortfolioAsset {
@@ -66,7 +65,7 @@ function buildAssetUrl(storageKey: string): string {
   // Images are uploaded to the API server at /var/www/vizualgraphics/public/uploads/
   // storageKey is like: "uploads/1792601833118-45efac01.png"
   // Access via API server domain
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.vizualgraphics.com"
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
   if (!apiUrl) {
     console.error("NEXT_PUBLIC_API_URL not set, using fallback")
   }
@@ -367,7 +366,7 @@ export default async function PortfolioPage(props: {
                       )}
 
                       {!primaryAsset && (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black">
+                        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-800 via-gray-900 to-black">
                           <div className="text-center">
                             <div className="text-5xl font-black opacity-20 mb-2" style={{ color: "var(--ink)" }}>
                               {item.title.charAt(0).toUpperCase()}
@@ -380,7 +379,7 @@ export default async function PortfolioPage(props: {
                       )}
 
                       {/* Overlay - Always visible with gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex flex-col justify-end p-6">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/70 to-transparent flex flex-col justify-end p-6">
                         <div className="space-y-3">
                           <div>
                             {item.service && (
