@@ -62,13 +62,7 @@ async function getPortfolioItems(): Promise<PortfolioItem[]> {
 }
 
 function buildAssetUrl(storageKey: string): string {
-  // Images are uploaded to the API server at /var/www/vizualgraphics/public/uploads/
-  // storageKey is like: "uploads/1792601833118-45efac01.png"
-  // Access via API server domain
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vizualgraphics.com'
-  if (!apiUrl) {
-    console.error("NEXT_PUBLIC_API_URL not set, using fallback")
-  }
   return `${apiUrl}/${storageKey}`
 }
 
