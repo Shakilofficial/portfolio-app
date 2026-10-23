@@ -81,7 +81,7 @@ export default function Home() {
 
   return (
     <main
-      className="relative min-h-screen overflow-hidden flex items-center justify-center py-4 sm:py-6 md:py-8"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden py-4 sm:py-6 md:py-8"
       style={{ backgroundColor: "var(--bg)" }}
     >
       <div
@@ -99,7 +99,7 @@ export default function Home() {
       <div className="relative mx-auto w-full max-w-6xl px-3 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
           {/* Left: Promotional Banner - Hidden on mobile */}
-          <div className="hidden lg:flex flex-col justify-center space-y-8">
+          <div className="hidden flex-col justify-center space-y-8 lg:flex">
             <div className="space-y-6">
               <div
                 className="inline-flex w-fit items-center gap-3 rounded-full px-4 py-2"
@@ -165,7 +165,7 @@ export default function Home() {
           </div>
 
           {/* Right: Access Form */}
-          <div className="flex justify-center w-full lg:w-auto">
+          <div className="flex w-full justify-center lg:w-auto">
             <div
               className="relative w-full max-w-sm overflow-hidden rounded-lg p-5 sm:p-8 lg:p-10"
               style={{
@@ -189,34 +189,40 @@ export default function Home() {
               <div className="space-y-5 sm:space-y-6">
                 <div className="flex items-center justify-center">
                   <div
-                    className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full"
+                    className="flex h-12 w-12 items-center justify-center rounded-full sm:h-14 sm:w-14"
                     style={{ backgroundColor: "rgba(0, 201, 255, 0.15)" }}
                   >
-                    <Lock className="h-6 w-6 sm:h-7 sm:w-7" style={{ color: "var(--color-accent)" }} />
+                    <Lock
+                      className="h-6 w-6 sm:h-7 sm:w-7"
+                      style={{ color: "var(--color-accent)" }}
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2 text-center">
                   <h2
-                    className="font-display text-2xl sm:text-3xl font-bold"
+                    className="font-display text-2xl font-bold sm:text-3xl"
                     style={{ color: "var(--ink)" }}
                   >
                     Access Portfolio
                   </h2>
-                  <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                  <p
+                    className="text-xs leading-relaxed sm:text-sm"
+                    style={{ color: "var(--ink-soft)" }}
+                  >
                     Enter your details to view our curated work
                   </p>
                 </div>
 
                 <form action={formAction} className="space-y-3">
                   {state?.success && (
-                    <div className="rounded-sm border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs sm:text-sm text-green-600 dark:text-green-400">
+                    <div className="rounded-sm border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs text-green-600 sm:text-sm dark:text-green-400">
                       ✓ Portfolio access granted! Redirecting...
                     </div>
                   )}
 
                   {state && !state.success && (
-                    <div className="rounded-sm border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400">
+                    <div className="rounded-sm border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-600 sm:text-sm dark:text-red-400">
                       {state.error || "Something went wrong. Please try again."}
                     </div>
                   )}
@@ -224,7 +230,7 @@ export default function Home() {
                   <div className="space-y-1.5">
                     <label
                       htmlFor="name"
-                      className="block text-xs sm:text-sm font-semibold"
+                      className="block text-xs font-semibold sm:text-sm"
                       style={{ color: "var(--ink)" }}
                     >
                       Your Name
@@ -235,7 +241,7 @@ export default function Home() {
                       type="text"
                       required
                       disabled={isPending}
-                      className="w-full rounded-sm border px-3 py-2 text-xs sm:text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      className="w-full rounded-sm border px-3 py-2 text-xs transition-colors focus:ring-1 focus:outline-none disabled:opacity-50 sm:text-sm"
                       style={{
                         backgroundColor: "var(--bg)",
                         color: "var(--ink)",
@@ -248,7 +254,7 @@ export default function Home() {
                   <div className="space-y-1.5">
                     <label
                       htmlFor="email"
-                      className="block text-xs sm:text-sm font-semibold"
+                      className="block text-xs font-semibold sm:text-sm"
                       style={{ color: "var(--ink)" }}
                     >
                       Email Address
@@ -259,7 +265,7 @@ export default function Home() {
                       type="email"
                       required
                       disabled={isPending}
-                      className="w-full rounded-sm border px-3 py-2 text-xs sm:text-sm transition-colors focus:ring-1 focus:outline-none disabled:opacity-50"
+                      className="w-full rounded-sm border px-3 py-2 text-xs transition-colors focus:ring-1 focus:outline-none disabled:opacity-50 sm:text-sm"
                       style={{
                         backgroundColor: "var(--bg)",
                         color: "var(--ink)",
@@ -275,7 +281,7 @@ export default function Home() {
                       type="checkbox"
                       required
                       disabled={isPending}
-                      className="mt-0.5 cursor-pointer h-4 w-4"
+                      className="mt-0.5 h-4 w-4 cursor-pointer"
                       style={{ accentColor: "var(--color-accent)" }}
                     />
                     <span className="text-xs leading-snug" style={{ color: "var(--ink-soft)" }}>
@@ -286,7 +292,7 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="w-full rounded-sm px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 hover:opacity-90 active:scale-95"
+                    className="w-full rounded-sm px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                     style={{
                       backgroundColor: "var(--ink)",
                     }}
