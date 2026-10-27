@@ -152,7 +152,7 @@ export default function Home() {
                   <span className="mt-1 shrink-0 text-xs" style={{ color: "var(--color-accent)" }}>
                     ◆
                   </span>
-                  <span>Before and after comparisons</span>
+                  <span>Full project galleries, curated by client</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-1 shrink-0 text-xs" style={{ color: "var(--color-accent)" }}>

@@ -22,9 +22,8 @@ export interface PortfolioItem {
   industry: string | null
   sortOrder: number
   assets: PortfolioAsset[]
-  beforeImageUrl: string | null
-  afterImageUrl: string | null
-  galleryUrls: string[]
+  /** Ordered image list — the first one is the cover. */
+  imageUrls: string[]
   coverImageUrl: string | null
   service: { id: string; title: string } | null
 }
@@ -49,32 +48,24 @@ const VIDEO_EXT = /\.(mp4|webm|mov)$/i
 
 export const isVideo = (url: string) => VIDEO_EXT.test(url)
 
-// Gallery slides shown after the before/after comparison in the dialog.
-export const gallerySlides = (item: PortfolioItem): PortfolioSlide[] =>
-  item.galleryUrls.map((url) => ({ url: assetUrl(url), kind: isVideo(url) ? "video" : "image" }))
-
-export const hasComparison = (item: PortfolioItem) =>
-  Boolean(item.beforeImageUrl && item.afterImageUrl)
+// All of an item's images as resolved slides, in display order.
+export const portfolioSlides = (item: PortfolioItem): PortfolioSlide[] =>
+  item.imageUrls.map((url) => ({ url: assetUrl(url), kind: isVideo(url) ? "video" : "image" }))
 
 export const coverUrl = (item: PortfolioItem): string | null => {
-  const cover = item.coverImageUrl ?? item.afterImageUrl ?? item.galleryUrls[0] ?? null
+  const cover = item.coverImageUrl ?? item.imageUrls[0] ?? null
   return cover ? assetUrl(cover) : null
 }
 
-// Older feed versions lacked the resolved role fields — derive them from
-// `assets` so the app works against either API shape.
+// Older feed versions lacked the resolved `imageUrls`/`coverImageUrl` fields
+// — derive them from `assets` so the app works against either API shape.
 type RawItem = Partial<PortfolioItem> & Pick<PortfolioItem, "id" | "slug" | "title">
 
 export const normalizeItem = (raw: RawItem): PortfolioItem => {
   const assets = [...(raw.assets ?? [])].sort((a, b) => a.sortOrder - b.sortOrder)
   const pathOf = (asset: PortfolioAsset) => asset.url ?? `/uploads/${asset.storageKey}`
-  const before = assets.find((a) => a.caption === "before")
-  const after = assets.find((a) => a.caption === "after")
-  const gallery = assets.filter((a) => a !== before && a !== after).map(pathOf)
 
-  const beforeImageUrl = raw.beforeImageUrl ?? (before ? pathOf(before) : null)
-  const afterImageUrl = raw.afterImageUrl ?? (after ? pathOf(after) : null)
-  const galleryUrls = raw.galleryUrls ?? gallery
+  const imageUrls = raw.imageUrls ?? assets.map(pathOf)
   return {
     id: raw.id,
     slug: raw.slug,
@@ -84,10 +75,8 @@ export const normalizeItem = (raw: RawItem): PortfolioItem => {
     industry: raw.industry ?? null,
     sortOrder: raw.sortOrder ?? 0,
     assets,
-    beforeImageUrl,
-    afterImageUrl,
-    galleryUrls,
-    coverImageUrl: raw.coverImageUrl ?? afterImageUrl ?? galleryUrls[0] ?? beforeImageUrl,
+    imageUrls,
+    coverImageUrl: raw.coverImageUrl ?? imageUrls[0] ?? null,
     service: raw.service ?? null,
   }
 }
@@ -95,7 +84,7 @@ export const normalizeItem = (raw: RawItem): PortfolioItem => {
 export const getPortfolioItems = async (): Promise<PortfolioItem[]> => {
   try {
     const response = await fetch(`${API_URL}/api/portfolio/items`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 30 },
     })
     if (!response.ok) {
       console.error("Failed to fetch portfolio items:", response.status)

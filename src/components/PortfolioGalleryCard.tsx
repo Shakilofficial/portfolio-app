@@ -1,10 +1,10 @@
 "use client"
 
-import { Columns2, Images, PlayCircle } from "lucide-react"
+import { Images, PlayCircle } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 
-import { coverUrl, hasComparison, INDUSTRY_LABEL, isVideo } from "@/lib/portfolio"
+import { coverUrl, INDUSTRY_LABEL, isVideo } from "@/lib/portfolio"
 
 import type { PortfolioItem } from "@/lib/portfolio"
 
@@ -16,8 +16,7 @@ interface PortfolioGalleryCardProps {
 export const PortfolioGalleryCard = ({ item, onOpen }: PortfolioGalleryCardProps) => {
   const [failed, setFailed] = useState(false)
   const cover = failed ? null : coverUrl(item)
-  const comparison = hasComparison(item)
-  const mediaCount = item.galleryUrls.length + (comparison ? 1 : 0)
+  const mediaCount = item.imageUrls.length
   const eyebrow = item.service?.title ?? (item.industry ? INDUSTRY_LABEL[item.industry] : null)
 
   return (
@@ -62,14 +61,7 @@ export const PortfolioGalleryCard = ({ item, onOpen }: PortfolioGalleryCardProps
       )}
 
       {/* Badges */}
-      <div className="absolute top-3 right-3 left-3 flex justify-between gap-2">
-        {comparison ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] text-white uppercase backdrop-blur-sm">
-            <Columns2 className="h-3 w-3" /> Before / After
-          </span>
-        ) : (
-          <span />
-        )}
+      <div className="absolute top-3 right-3 left-3 flex justify-end gap-2">
         {mediaCount > 1 && (
           <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
             <Images className="h-3 w-3" /> {mediaCount}

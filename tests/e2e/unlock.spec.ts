@@ -1,10 +1,14 @@
 import { test, expect } from "@playwright/test"
 
-const BASE_URL = "https://portfolio.vizualgraphics.com"
+// Relative navigation only — playwright.config.ts's baseURL points these at
+// the local dev server (localhost:3010). A previous version of this file
+// hardcoded an absolute production URL here and every page.goto(BASE_URL)
+// silently bypassed the config, submitting real test leads to the live
+// backend instead of testing the local build.
 
 test.describe("Portfolio Unlock Flow", () => {
   test("should load unlock form on homepage", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Check form exists
     await expect(page.locator("text=Unlock Portfolio")).toBeVisible()
@@ -14,7 +18,7 @@ test.describe("Portfolio Unlock Flow", () => {
   })
 
   test("should validate required fields", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Try submitting empty form
     await page.click('button:has-text("Unlock Portfolio")')
@@ -31,7 +35,7 @@ test.describe("Portfolio Unlock Flow", () => {
   })
 
   test("should reject invalid email", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Fill form with invalid email
     await page.fill('input[name="name"]', "Test User")
@@ -45,12 +49,12 @@ test.describe("Portfolio Unlock Flow", () => {
     await page.waitForTimeout(2000)
 
     // Should show error or stay on page
-    const stillOnPage = await page.url().includes(BASE_URL)
+    const stillOnPage = new URL(page.url()).pathname === "/"
     console.log(`✅ Form validation working (still on unlock page: ${stillOnPage})`)
   })
 
   test("should handle successful unlock and redirect", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Fill form with valid data
     const uniqueEmail = `unlock-test-${Date.now()}@example.com`
@@ -72,7 +76,7 @@ test.describe("Portfolio Unlock Flow", () => {
 
     // Look for either portfolio content or error message
     const hasPortfolioContent = await page
-      .locator("text=/Our Portfolio|Portfolio Item/i")
+      .locator("text=/Our Best Work|Portfolio Gallery/i")
       .isVisible()
       .catch(() => false)
     const hasErrorMessage = await page
@@ -94,7 +98,7 @@ test.describe("Portfolio Unlock Flow", () => {
   })
 
   test("should show button loading state while submitting", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Fill form
     await page.fill('input[name="name"]', "Test User")
@@ -117,7 +121,7 @@ test.describe("Portfolio Unlock Flow", () => {
   })
 
   test("should display form fields with correct styling", async ({ page }) => {
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Check form layout
     const form = page.locator("form").first()
@@ -139,7 +143,7 @@ test.describe("Portfolio Unlock Flow", () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
 
-    await page.goto(BASE_URL)
+    await page.goto("/")
 
     // Check form is still usable
     await expect(page.locator('input[name="name"]')).toBeVisible()
@@ -151,11 +155,11 @@ test.describe("Portfolio Unlock Flow", () => {
 
   test("should navigate to portfolio gallery page", async ({ page }) => {
     // Direct navigation to portfolio page
-    await page.goto(`${BASE_URL}/portfolio`)
+    await page.goto("/portfolio")
 
     // Check portfolio content
-    const portfolioTitle = page.locator("text=Our Portfolio")
-    const portfolioItems = page.locator("text=/Portfolio Item/i")
+    const portfolioTitle = page.locator("text=Our Best Work")
+    const portfolioItems = page.getByTestId("portfolio-card")
 
     const titleVisible = await portfolioTitle.isVisible().catch(() => false)
 

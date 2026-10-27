@@ -5,11 +5,9 @@ import { AnimatePresence, motion } from "motion/react"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-import { BeforeAfterSlider } from "./BeforeAfterSlider"
+import { INDUSTRY_LABEL, portfolioSlides } from "@/lib/portfolio"
 
-import { assetUrl, gallerySlides, hasComparison, INDUSTRY_LABEL } from "@/lib/portfolio"
-
-import type { PortfolioItem, PortfolioSlide } from "@/lib/portfolio"
+import type { PortfolioItem } from "@/lib/portfolio"
 
 interface PortfolioDialogProps {
   items: PortfolioItem[]
@@ -18,22 +16,7 @@ interface PortfolioDialogProps {
   onNavigate: (index: number) => void
 }
 
-type Slide = { kind: "comparison"; before: string; after: string } | PortfolioSlide
-
 const EASE_OUT = [0.16, 1, 0.3, 1] as const
-
-const slidesFor = (item: PortfolioItem): Slide[] => {
-  const slides: Slide[] = []
-  if (hasComparison(item))
-    slides.push({
-      kind: "comparison",
-      before: assetUrl(item.beforeImageUrl!),
-      after: assetUrl(item.afterImageUrl!),
-    })
-  else if (item.afterImageUrl ?? item.beforeImageUrl)
-    slides.push({ kind: "image", url: assetUrl((item.afterImageUrl ?? item.beforeImageUrl)!) })
-  return [...slides, ...gallerySlides(item)]
-}
 
 export const PortfolioDialog = ({ items, index, onClose, onNavigate }: PortfolioDialogProps) => {
   const item = items[index]
@@ -76,7 +59,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
 
   if (!item) return null
 
-  const slides = slidesFor(item)
+  const slides = portfolioSlides(item)
   const current = slides[slide] ?? slides[0]
   const industry = item.industry ? INDUSTRY_LABEL[item.industry] : null
 
@@ -139,12 +122,6 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                     <div className="text-ink-soft flex h-full items-center justify-center text-sm">
                       No media
                     </div>
-                  ) : current.kind === "comparison" ? (
-                    <BeforeAfterSlider
-                      beforeImageUrl={current.before}
-                      afterImageUrl={current.after}
-                      alt={item.title}
-                    />
                   ) : current.kind === "video" ? (
                     <video
                       key={current.url}
@@ -195,7 +172,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                     type="button"
                     role="tab"
                     aria-selected={i === slide}
-                    aria-label={s.kind === "comparison" ? "Before / after" : `Media ${i + 1}`}
+                    aria-label={`Media ${i + 1}`}
                     onClick={() => setSlide(i)}
                     className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-md transition-opacity ${
                       i === slide ? "ring-accent ring-2" : "opacity-60 hover:opacity-90"
@@ -209,18 +186,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                         preload="metadata"
                       />
                     ) : (
-                      <Image
-                        src={s.kind === "comparison" ? s.after : s.url}
-                        alt=""
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    )}
-                    {s.kind === "comparison" && (
-                      <span className="absolute inset-x-0 bottom-0 bg-black/60 text-center text-[9px] font-bold text-white uppercase">
-                        B / A
-                      </span>
+                      <Image src={s.url} alt="" fill unoptimized className="object-cover" />
                     )}
                   </button>
                 ))}

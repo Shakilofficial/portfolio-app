@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test"
 
 // Runs against whatever vizualgraphics feed NEXT_PUBLIC_API_URL points at.
-// Comparison checks need at least one published item with before + after.
 
 test.describe("Portfolio gallery", () => {
   test("renders published items with loading images", async ({ page }) => {
@@ -52,42 +51,27 @@ test.describe("Portfolio gallery", () => {
     await expect(page).not.toHaveURL(/item=/)
   })
 
-  test("deep link opens the item and shows the before/after slider", async ({ page, request }) => {
+  test("deep link opens the item and shows its images", async ({ page, request }) => {
     const feedUrl = `${process.env.E2E_API_URL ?? "http://localhost:3000"}/api/portfolio/items`
     const feed = await (await request.get(feedUrl)).json()
-    const withComparison = feed.data.find(
-      (item: { beforeImageUrl: string | null; afterImageUrl: string | null }) =>
-        item.beforeImageUrl && item.afterImageUrl
-    )
-    test.skip(!withComparison, "no published item with before + after images")
+    const withImages = feed.data.find((item: { imageUrls: string[] }) => item.imageUrls.length > 1)
+    test.skip(!withImages, "no published item with more than one image")
 
-    await page.goto(`/portfolio?item=${withComparison.slug}`)
+    await page.goto(`/portfolio?item=${withImages.slug}`)
     const dialog = page.getByTestId("portfolio-dialog")
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole("heading", { name: withComparison.title })).toBeVisible()
+    await expect(dialog.getByRole("heading", { name: withImages.title })).toBeVisible()
 
-    const slider = dialog.getByTestId("before-after-slider")
-    await expect(slider).toBeVisible()
-    for (const img of await slider.locator("img").all()) {
-      await expect
-        .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth))
-        .toBeGreaterThan(0)
-    }
+    const stage = dialog.locator("img").first()
+    await expect
+      .poll(() => stage.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth))
+      .toBeGreaterThan(0)
 
-    // Drag the handle toward the left edge and confirm the value moves.
-    const box = (await slider.boundingBox())!
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-    await page.mouse.down()
-    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2, { steps: 5 })
-    await page.mouse.up()
-    const value = Number(await slider.getAttribute("aria-valuenow"))
-    expect(value).toBeLessThan(35)
-
-    // Thumbnail strip switches to a gallery slide.
-    if (withComparison.galleryUrls.length > 0) {
-      await dialog.getByRole("tab", { name: "Media 2" }).click()
-      await expect(slider).toBeHidden()
-    }
+    // Thumbnail strip switches to the next image.
+    await dialog.getByRole("tab", { name: "Media 2" }).click()
+    await expect
+      .poll(() => stage.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth))
+      .toBeGreaterThan(0)
   })
 
   test("unknown ?item= falls back to the gallery", async ({ page }) => {
