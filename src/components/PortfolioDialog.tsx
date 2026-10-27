@@ -82,13 +82,12 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
         exit={{ opacity: 0, y: 20, scale: 0.98 }}
         transition={{ duration: 0.4, ease: EASE_OUT }}
         onClick={(event) => event.stopPropagation()}
-        className="bg-bg text-ink relative flex h-full w-full max-w-7xl flex-col overflow-hidden sm:h-[min(92svh,860px)] sm:rounded-3xl"
+        className="bg-slate-900 text-white relative flex h-full w-full max-w-6xl flex-col overflow-hidden sm:h-[min(92svh,900px)] sm:rounded-2xl border border-slate-800"
       >
-        {/* Progress through the collection */}
-        <div className="bg-border absolute inset-x-0 top-0 z-20 h-0.5">
+        {/* Progress Bar */}
+        <div className="absolute inset-x-0 top-0 z-20 h-0.5 bg-slate-800">
           <motion.div
-            className="h-full origin-left"
-            style={{ backgroundImage: "var(--gradient-accent)" }}
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 origin-left"
             initial={false}
             animate={{ scaleX: (index + 1) / Math.max(items.length, 1) }}
             transition={{ duration: 0.6, ease: EASE_OUT }}
@@ -100,14 +99,14 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="bg-bg/80 border-border hover:bg-ink hover:text-bg absolute top-4 right-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-colors"
+          className="bg-slate-800 hover:bg-slate-700 border-slate-700 absolute top-4 right-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all hover:scale-110"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5 text-white" />
         </button>
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_380px] lg:overflow-hidden">
+        <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden">
           {/* Stage */}
-          <div className="bg-bg-3 relative flex flex-col lg:min-h-0">
+          <div className="bg-slate-950 relative flex flex-col lg:min-h-0">
             <div className="relative flex h-[60svh] items-center justify-center p-4 pt-16 sm:p-8 lg:h-auto lg:flex-1">
               <AnimatePresence mode="wait" custom={direction} initial={false}>
                 <motion.div
@@ -147,7 +146,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                   type="button"
                   onClick={() => onNavigate(index - 1)}
                   aria-label="Previous project"
-                  className="absolute left-3 z-10 rounded-full bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
+                  className="absolute left-4 z-10 rounded-lg bg-white/10 hover:bg-white/20 p-3 text-white transition-all hover:scale-110 backdrop-blur-md border border-white/10"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
@@ -157,7 +156,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                   type="button"
                   onClick={() => onNavigate(index + 1)}
                   aria-label="Next project"
-                  className="absolute right-3 z-10 rounded-full bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
+                  className="absolute right-4 z-10 rounded-lg bg-white/10 hover:bg-white/20 p-3 text-white transition-all hover:scale-110 backdrop-blur-md border border-white/10"
                 >
                   <ArrowRight className="h-5 w-5" />
                 </button>
@@ -165,7 +164,7 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
             </div>
 
             {slides.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto px-4 pb-4 sm:px-8" role="tablist">
+              <div className="flex gap-3 overflow-x-auto px-4 pb-4 sm:px-8" role="tablist">
                 {slides.map((s, i) => (
                   <button
                     key={i}
@@ -174,8 +173,10 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
                     aria-selected={i === slide}
                     aria-label={`Media ${i + 1}`}
                     onClick={() => setSlide(i)}
-                    className={`relative h-14 w-20 shrink-0 overflow-hidden rounded-md transition-opacity ${
-                      i === slide ? "ring-accent ring-2" : "opacity-60 hover:opacity-90"
+                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg transition-all border ${
+                      i === slide
+                        ? "ring-2 ring-blue-500 border-blue-500"
+                        : "border-slate-700 opacity-60 hover:opacity-100"
                     }`}
                   >
                     {s.kind === "video" ? (
@@ -195,32 +196,32 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
           </div>
 
           {/* Details */}
-          <div className="border-border bg-bg flex flex-col gap-6 border-t p-6 lg:overflow-y-auto lg:border-t-0 lg:border-l">
+          <div className="border-slate-800 bg-slate-900 flex flex-col gap-6 border-t p-6 lg:overflow-y-auto lg:border-t-0 lg:border-l">
             {(item.service || industry) && (
-              <p className="text-accent-text text-xs font-bold tracking-widest uppercase">
+              <p className="text-blue-400 text-xs font-bold tracking-widest uppercase">
                 {item.service?.title ?? industry}
               </p>
             )}
-            <h2 className="pr-10 text-3xl leading-tight font-bold">{item.title}</h2>
+            <h2 className="pr-10 text-2xl leading-tight font-bold text-white">{item.title}</h2>
 
             {item.clientName && (
-              <div>
-                <p className="text-ink-soft text-xs font-medium tracking-wide uppercase">Client</p>
-                <p className="mt-1 text-lg font-semibold">{item.clientName}</p>
+              <div className="pb-4 border-b border-slate-700">
+                <p className="text-slate-400 text-xs font-medium tracking-wide uppercase mb-2">Client</p>
+                <p className="text-lg font-semibold text-white">{item.clientName}</p>
               </div>
             )}
 
             {item.description && (
               <div>
-                <p className="text-ink-soft text-xs font-medium tracking-wide uppercase">About</p>
-                <p className="mt-2 text-sm leading-relaxed whitespace-pre-line">
+                <p className="text-slate-400 text-xs font-medium tracking-wide uppercase mb-2">About</p>
+                <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-line">
                   {item.description}
                 </p>
               </div>
             )}
 
-            <p className="text-ink-soft mt-auto font-mono text-xs">
-              {index + 1} / {items.length}
+            <p className="text-slate-500 mt-auto font-mono text-xs">
+              {index + 1} of {items.length}
             </p>
           </div>
         </div>

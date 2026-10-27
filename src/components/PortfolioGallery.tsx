@@ -54,7 +54,7 @@ export const PortfolioGallery = ({ items, initialOpenSlug }: PortfolioGalleryPro
 
   if (items.length === 0) {
     return (
-      <p className="text-ink-soft py-24 text-center text-sm" data-testid="portfolio-empty">
+      <p className="text-gray-400 py-24 text-center text-sm" data-testid="portfolio-empty">
         No portfolio items to display yet.
       </p>
     )
@@ -64,7 +64,7 @@ export const PortfolioGallery = ({ items, initialOpenSlug }: PortfolioGalleryPro
     <>
       <div
         data-testid="portfolio-grid"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max"
       >
         {items.map((item, index) => (
           <PortfolioGalleryCard key={item.id} item={item} onOpen={() => open(index)} />
