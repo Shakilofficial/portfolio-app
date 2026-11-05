@@ -5,8 +5,6 @@ import { getPortfolioItems } from "@/lib/portfolio"
 
 import type { Metadata } from "next"
 
-const NOISE_BG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`
-
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
@@ -26,78 +24,50 @@ const GalleryLoader = async ({ searchParams }: PortfolioPageProps) => {
 }
 
 const GallerySkeleton = () => (
-  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max" aria-busy="true">
-    {Array.from({ length: 6 }, (_, i) => (
-      <div key={i} className="bg-linear-to-br from-slate-800 to-slate-900 aspect-4/5 animate-pulse rounded-lg border border-slate-700" />
+  <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
+    {Array.from({ length: 8 }, (_, i) => (
+      <div key={i} className="aspect-[4/5] animate-pulse bg-[#1c1914]" />
     ))}
   </div>
 )
 
-export default function PortfolioPage({ searchParams }: PortfolioPageProps) {
+const PortfolioPage = ({ searchParams }: PortfolioPageProps) => {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 pt-16 pb-24 md:pt-20 md:pb-32">
-      {/* Gradient decoration - top right */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full blur-3xl opacity-20"
-        style={{ background: "radial-gradient(circle, #60a5fa 0%, transparent 70%)" }}
-      />
-
-      {/* Gradient decoration - bottom left */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full blur-3xl opacity-10"
-        style={{ background: "radial-gradient(circle, #a78bfa 0%, transparent 70%)" }}
-      />
-
-      {/* Noise background */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-overlay"
-        style={{ backgroundImage: NOISE_BG }}
-      />
-
-      <div className="site-container relative">
+    <main className="min-h-screen bg-[#15130f] pt-14 pb-20 md:pt-20 md:pb-28">
+      <div className="mx-auto w-full max-w-[1760px] px-4 sm:px-8 lg:px-12">
         {/* Header */}
-        <header className="mb-16 space-y-6 md:mb-20">
-          <div className="space-y-4">
-            <p className="text-sm font-bold tracking-widest uppercase text-blue-400">
-              Creative Portfolio
-            </p>
-            <h1 className="text-5xl md:text-6xl 2xl:text-7xl font-bold text-white leading-tight">
-              Our Creative Work
-            </h1>
-            <p className="text-lg text-gray-300 max-w-3xl leading-relaxed">
-              Explore a curated collection of professional projects showcasing image editing, video production, and creative design work. Click on any project to view the full details and story behind it.
-            </p>
-          </div>
+        <header className="mb-10 flex flex-col gap-4 border-b border-[#2a2620] pb-8 sm:flex-row sm:items-end sm:justify-between md:mb-14">
+          <h1
+            className="text-4xl leading-[1.1] text-[#ece6d6] italic md:text-5xl"
+            style={{ fontFamily: "var(--font-fraunces), Georgia, serif" }}
+          >
+            Selected work
+          </h1>
+          <p className="max-w-sm text-sm leading-relaxed text-[#ece6d6]/55 sm:text-right">
+            Image editing, video, and 3D/CGI projects. Open any piece for the full set.
+          </p>
         </header>
 
         {/* Gallery */}
-        <div className="mb-16">
-          <Suspense fallback={<GallerySkeleton />}>
-            <GalleryLoader searchParams={searchParams} />
-          </Suspense>
-        </div>
+        <Suspense fallback={<GallerySkeleton />}>
+          <GalleryLoader searchParams={searchParams} />
+        </Suspense>
 
-        {/* Footer CTA */}
-        <div className="mt-24 rounded-xl p-12 md:p-16 text-center bg-gradient-to-r from-blue-600/10 to-purple-600/10 border border-blue-500/20 backdrop-blur-sm">
-          <h2 className="mb-4 text-3xl md:text-4xl font-bold text-white">
-            Ready to create something amazing?
-          </h2>
-          <p className="mb-8 text-lg text-gray-300 max-w-2xl mx-auto">
-            Let&apos;s work together to bring your vision to life with professional design and creative excellence.
-          </p>
+        {/* Footer */}
+        <div className="mt-16 flex flex-col items-center gap-2 border-t border-[#2a2620] pt-8 text-center md:mt-20">
+          <p className="text-sm text-[#ece6d6]/55">Want work like this for your brand?</p>
           <a
             href="https://vizualgraphics.com/contact"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block rounded-lg px-8 py-3 font-semibold transition-all hover:scale-105 bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600"
+            className="text-sm font-medium text-[#c49a56] underline underline-offset-4 transition-colors hover:text-[#d9b876]"
           >
-            Get in Touch
+            Get in touch
           </a>
         </div>
       </div>
     </main>
   )
 }
+
+export default PortfolioPage

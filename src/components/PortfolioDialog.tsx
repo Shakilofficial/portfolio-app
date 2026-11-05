@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-import { INDUSTRY_LABEL, portfolioSlides } from "@/lib/portfolio"
+import { portfolioSlides } from "@/lib/portfolio"
 
 import type { PortfolioItem } from "@/lib/portfolio"
 
@@ -31,11 +31,17 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
     setSlide(0)
   }
 
-  const [shownIndex, setShownIndex] = useState(index)
-  const [direction, setDirection] = useState(1)
-  if (shownIndex !== index) {
-    setDirection(index > shownIndex ? 1 : -1)
-    setShownIndex(index)
+  const slides = item ? portfolioSlides(item) : []
+  const slideCount = slides.length
+  const current = slides[slide] ?? slides[0]
+
+  const goPrev = () => {
+    if (slide > 0) setSlide((s) => s - 1)
+    else if (hasPrev) onNavigate(index - 1)
+  }
+  const goNext = () => {
+    if (slide < slideCount - 1) setSlide((s) => s + 1)
+    else if (hasNext) onNavigate(index + 1)
   }
 
   useEffect(() => {
@@ -50,18 +56,15 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose()
-      if (event.key === "ArrowRight" && hasNext) onNavigate(index + 1)
-      if (event.key === "ArrowLeft" && hasPrev) onNavigate(index - 1)
+      if (event.key === "ArrowRight") goNext()
+      if (event.key === "ArrowLeft") goPrev()
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [index, hasNext, hasPrev, onClose, onNavigate])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slide, slideCount, hasNext, hasPrev, index, onClose, onNavigate])
 
   if (!item) return null
-
-  const slides = portfolioSlides(item)
-  const current = slides[slide] ?? slides[0]
-  const industry = item.industry ? INDUSTRY_LABEL[item.industry] : null
 
   return (
     <motion.div
@@ -73,159 +76,114 @@ export const PortfolioDialog = ({ items, index, onClose, onNavigate }: Portfolio
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-110 flex items-stretch justify-center bg-black/80 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-110 flex items-center justify-center bg-[#0b0a08]/97"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-        transition={{ duration: 0.4, ease: EASE_OUT }}
-        onClick={(event) => event.stopPropagation()}
-        className="bg-slate-900 text-white relative flex h-full w-full max-w-6xl flex-col overflow-hidden sm:h-[min(92svh,900px)] sm:rounded-2xl border border-slate-800"
+      <button
+        ref={closeRef}
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-5 right-5 z-30 flex h-9 w-9 items-center justify-center text-[#ece6d6]/70 transition-colors hover:text-[#ece6d6]"
       >
-        {/* Progress Bar */}
-        <div className="absolute inset-x-0 top-0 z-20 h-0.5 bg-slate-800">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 origin-left"
-            initial={false}
-            animate={{ scaleX: (index + 1) / Math.max(items.length, 1) }}
-            transition={{ duration: 0.6, ease: EASE_OUT }}
-          />
-        </div>
+        <X className="h-5 w-5" strokeWidth={1.5} />
+      </button>
 
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="bg-slate-800 hover:bg-slate-700 border-slate-700 absolute top-4 right-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all hover:scale-110"
+      {slides.length > 1 && (
+        <p
+          className="absolute top-6 left-6 z-30 text-xs text-[#ece6d6]/50 italic"
+          style={{ fontFamily: "var(--font-fraunces), Georgia, serif" }}
         >
-          <X className="h-5 w-5 text-white" />
-        </button>
+          {slide + 1} / {slides.length}
+        </p>
+      )}
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_360px] lg:overflow-hidden">
-          {/* Stage */}
-          <div className="bg-slate-950 relative flex flex-col lg:min-h-0">
-            <div className="relative flex h-[60svh] items-center justify-center p-4 pt-16 sm:p-8 lg:h-auto lg:flex-1">
-              <AnimatePresence mode="wait" custom={direction} initial={false}>
-                <motion.div
-                  key={`${item.id}-${slide}`}
-                  initial={{ opacity: 0, x: 60 * direction }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -60 * direction }}
-                  transition={{ duration: 0.4, ease: EASE_OUT }}
-                  className="relative h-full w-full"
-                >
-                  {!current ? (
-                    <div className="text-ink-soft flex h-full items-center justify-center text-sm">
-                      No media
-                    </div>
-                  ) : current.kind === "video" ? (
-                    <video
-                      key={current.url}
-                      src={current.url}
-                      className="h-full w-full object-contain"
-                      controls
-                      playsInline
-                    />
-                  ) : (
-                    <Image
-                      src={current.url}
-                      alt={item.title}
-                      fill
-                      unoptimized
-                      className="object-contain"
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-
-              {hasPrev && (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(index - 1)}
-                  aria-label="Previous project"
-                  className="absolute left-4 z-10 rounded-lg bg-white/10 hover:bg-white/20 p-3 text-white transition-all hover:scale-110 backdrop-blur-md border border-white/10"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
-              )}
-              {hasNext && (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(index + 1)}
-                  aria-label="Next project"
-                  className="absolute right-4 z-10 rounded-lg bg-white/10 hover:bg-white/20 p-3 text-white transition-all hover:scale-110 backdrop-blur-md border border-white/10"
-                >
-                  <ArrowRight className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-
-            {slides.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto px-4 pb-4 sm:px-8" role="tablist">
-                {slides.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    role="tab"
-                    aria-selected={i === slide}
-                    aria-label={`Media ${i + 1}`}
-                    onClick={() => setSlide(i)}
-                    className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg transition-all border ${
-                      i === slide
-                        ? "ring-2 ring-blue-500 border-blue-500"
-                        : "border-slate-700 opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    {s.kind === "video" ? (
-                      <video
-                        src={s.url}
-                        className="h-full w-full object-cover"
-                        muted
-                        preload="metadata"
-                      />
-                    ) : (
-                      <Image src={s.url} alt="" fill unoptimized className="object-cover" />
-                    )}
-                  </button>
-                ))}
+      {/* Stage */}
+      <div
+        className="relative flex h-full w-full items-center justify-center p-4 sm:p-10 lg:p-16"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={`${item.id}-${slide}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35, ease: EASE_OUT }}
+            className="relative h-full w-full"
+          >
+            {!current ? (
+              <div className="flex h-full items-center justify-center text-sm text-[#ece6d6]/50">
+                No media
               </div>
+            ) : current.kind === "video" ? (
+              <video
+                key={current.url}
+                src={current.url}
+                className="h-full w-full object-contain"
+                controls
+                playsInline
+              />
+            ) : (
+              <Image
+                src={current.url}
+                alt={item.title}
+                fill
+                unoptimized
+                priority
+                className="object-contain"
+              />
             )}
-          </div>
+          </motion.div>
+        </AnimatePresence>
 
-          {/* Details */}
-          <div className="border-slate-800 bg-slate-900 flex flex-col gap-6 border-t p-6 lg:overflow-y-auto lg:border-t-0 lg:border-l">
-            {(item.service || industry) && (
-              <p className="text-blue-400 text-xs font-bold tracking-widest uppercase">
-                {item.service?.title ?? industry}
-              </p>
-            )}
-            <h2 className="pr-10 text-2xl leading-tight font-bold text-white">{item.title}</h2>
+        {(hasPrev || slide > 0) && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              goPrev()
+            }}
+            aria-label="Previous"
+            className="absolute left-2 z-10 flex h-11 w-11 items-center justify-center text-[#ece6d6]/50 transition-colors hover:text-[#ece6d6] sm:left-4"
+          >
+            <ArrowLeft className="h-6 w-6" strokeWidth={1.25} />
+          </button>
+        )}
+        {(hasNext || slide < slides.length - 1) && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              goNext()
+            }}
+            aria-label="Next"
+            className="absolute right-2 z-10 flex h-11 w-11 items-center justify-center text-[#ece6d6]/50 transition-colors hover:text-[#ece6d6] sm:right-4"
+          >
+            <ArrowRight className="h-6 w-6" strokeWidth={1.25} />
+          </button>
+        )}
+      </div>
 
-            {item.clientName && (
-              <div className="pb-4 border-b border-slate-700">
-                <p className="text-slate-400 text-xs font-medium tracking-wide uppercase mb-2">Client</p>
-                <p className="text-lg font-semibold text-white">{item.clientName}</p>
-              </div>
-            )}
-
-            {item.description && (
-              <div>
-                <p className="text-slate-400 text-xs font-medium tracking-wide uppercase mb-2">About</p>
-                <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-line">
-                  {item.description}
-                </p>
-              </div>
-            )}
-
-            <p className="text-slate-500 mt-auto font-mono text-xs">
-              {index + 1} of {items.length}
-            </p>
-          </div>
+      {/* Dot indicators — slideshow wayfinding, no project details shown */}
+      {slides.length > 1 && (
+        <div
+          className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to image ${i + 1}`}
+              onClick={() => setSlide(i)}
+              className={`h-1.5 rounded-full transition-all ${
+                i === slide ? "w-5 bg-[#c49a56]" : "w-1.5 bg-[#ece6d6]/25 hover:bg-[#ece6d6]/40"
+              }`}
+            />
+          ))}
         </div>
-      </motion.div>
+      )}
     </motion.div>
   )
 }
